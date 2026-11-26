@@ -928,11 +928,18 @@ function loadDemoState(){
   state.day = pickDefaultDay();
 }
 function visibleEntries(){ return state.players.flatMap(p=>p.entries); }
+/* Tomas: días en los que al menos una jugadora respondió. El formulario se envía la
+   mañana siguiente a cada sesión o partido, así que los días sin envío no existen como
+   dato: no cuentan como ausencias ni como días sin fatiga. */
+function tomaSet(){ return new Set(visibleEntries().map(e=>e.date)); }
+function tomaDaysIn(days){ const set = tomaSet(); return (days || getRangeDays()).filter(d=>set.has(d)); }
+function tomaDaysInRange(){ return tomaDaysIn(getRangeDays()); }
+function allTomaDays(){ return Array.from(new Set(state.entries.map(e=>e.date))).sort(); }
 function pickDefaultDay(){
-  if(!state.entries.length) return todayISO();
+  const tomas = allTomaDays();
+  if(!tomas.length) return todayISO();
   const today = todayISO();
-  if(state.entries.some(e=>e.date===today)) return today;
-  return state.entries[state.entries.length-1].date;
+  return tomas.includes(today) ? today : tomas[tomas.length-1];
 }
 function teamLabel(){
   if(state.teamName) return state.teamName;
@@ -1005,6 +1012,7 @@ function rangeStats(){
     discomfortPlayers: uniq(disList.map(e=>e.playerId)).length,
     periodPct: list.length ? periodList.length/list.length : null,
     periodPlayers: uniq(periodList.map(e=>e.playerId)).length,
+    periodN: periodList.length,
     periodAvg,
     prev
   };
@@ -1394,24 +1402,27 @@ function renderEquipo(){
   const st = rangeStats();
   if(!st) return renderEmpty();
   const today = todayISO();
-  let day = state.day || today;
-  if(day > today) day = today;
+  const tomas = allTomaDays();
+  const lastToma = tomas.length ? tomas[tomas.length-1] : today;
+  let day = state.day || lastToma;
+  if(!tomas.includes(day)) day = tomas.filter(d=>d<=day).pop() || lastToma;
   const th = state.thresholds;
   const fatDiff = (st.prev && st.prev.fatigue!=null && st.fatigue!=null) ? st.fatigue - st.prev.fatigue : null;
   const sleepDiff = (st.prev && st.prev.sleep!=null && st.sleep!=null) ? st.sleep - st.prev.sleep : null;
   const spanLabel = state.range==='all' ? `${st.days.length} días de historial` : `Últimos ${st.days.length} días`;
-  const compareLabel = state.range==='all' ? 'con todo el historial disponible' : 'comparado con el periodo anterior';
-  const todayList = visibleEntries().filter(e=>e.date===today);
-  const todayN = uniq(todayList.map(e=>e.playerId)).length;
-  const todayPct = state.players.length ? todayN/state.players.length : null;
+  const tomasInRange = tomaDaysIn(st.days).length;
+  const dayList = visibleEntries().filter(e=>e.date===day);
+  const dayN = uniq(dayList.map(e=>e.playerId)).length;
+  const dayPct = state.players.length ? dayN/state.players.length : null;
+  const prevLabel = state.range==='all' ? 'con todo el historial disponible' : 'comparado con el periodo anterior';
 
   const kpis = `
     <div class="kpis">
       ${kpiCard('Fatiga media', `${numDec(st.fatigue)}<small>/10</small>`, `${deltaPill(fatDiff,'down')}<span>${st.n} respuestas · ${st.players} jugadoras</span>`)}
       ${kpiCard('Calidad del sueño', `${numDec(st.sleep)}<small>/5</small>`, `${deltaPill(sleepDiff,'up')}<span>Noches malas (≤${th.sleepLow}): ${pct(st.lowSleepPct)}</span>`)}
       ${kpiCard('Molestias', `${pct(st.discomfortPct)}`, `<span>${st.discomfortPlayers} jugadoras · ${st.discomfortN} respuestas</span>`)}
-      ${kpiCard('Con la regla', `${num1(st.periodAvg)}<small> jugadoras/día</small>`, `<span>${pct(st.periodPct)} de las respuestas · ${st.periodPlayers} jugadoras</span>`)}
-      <div class="kpi"><div class="label">Parte de hoy</div><div class="value">${todayN}<small>/${state.players.length}</small></div><div class="progress"><i style="width:${(todayPct!=null?clamp(todayPct*100,0,100):0).toFixed(0)}%"></i></div><div class="sub"><span>${fmtDay(today)}</span><span class="muted">·</span><span>${pct(todayPct)} del equipo</span></div></div>
+      ${kpiCard('Con la regla', `${pct(st.periodPct)}`, `<span>${st.periodPlayers} jugadoras · ${st.periodN} respuestas</span>`)}
+      <div class="kpi"><div class="label">${day===lastToma?'Última toma':'Toma seleccionada'}</div><div class="value">${dayN}<small>/${state.players.length}</small></div><div class="progress"><i style="width:${(dayPct!=null?clamp(dayPct*100,0,100):0).toFixed(0)}%"></i></div><div class="sub"><span>${fmtDay(day)}</span><span class="muted">·</span><span>${pct(dayPct)} del equipo respondió</span></div></div>
     </div>`;
 
   return `<div class="page">
@@ -1419,7 +1430,7 @@ function renderEquipo(){
       <div>
         <div class="eyebrow">Wellness · Huddle7</div>
         <h1>Diario del equipo</h1>
-        <p>Fatiga física, molestias, sueño y regla de cada jugadora, día a día. ${spanLabel}: ${fmtDay(st.start,{wd:false})} – ${fmtDay(st.end,{wd:false})} · ${compareLabel}.</p>
+        <p>Fatiga, molestias, sueño y regla de cada jugadora. ${spanLabel}: ${fmtDay(st.start,{wd:false})} – ${fmtDay(st.end,{wd:false})} · <b>${tomasInRange} tomas con respuesta</b> · ${prevLabel}. Los días sin envío del formulario no cuentan.</p>
       </div>
       ${rangeSeg()}
     </div>
@@ -1427,11 +1438,11 @@ function renderEquipo(){
     ${parteDelDiaCard(day)}
     <div class="grid-2 mb-14">
       <div class="card">
-        <div class="card-head"><div><h3>Fatiga media del equipo</h3><div class="hint">1 = fresca · 10 = agotada. Línea discontinua: umbral ${th.fatigueHigh}.</div></div></div>
+        <div class="card-head"><div><h3>Fatiga media del equipo</h3><div class="hint">Cada punto es una toma (día con respuesta). 1 = fresca · 10 = agotada · umbral ${th.fatigueHigh}.</div></div></div>
         <div class="chart" data-chart="team-fatigue"></div>
       </div>
       <div class="card">
-        <div class="card-head"><div><h3>Calidad del sueño del equipo</h3><div class="hint">1 = muy mala · 5 = muy buena. Línea discontinua: umbral ${th.sleepLow}.</div></div></div>
+        <div class="card-head"><div><h3>Calidad del sueño del equipo</h3><div class="hint">Cada punto es una toma. 1 = muy mala · 5 = muy buena · umbral ${th.sleepLow}.</div></div></div>
         <div class="chart" data-chart="team-sleep"></div>
       </div>
     </div>
@@ -1442,6 +1453,11 @@ function renderEquipo(){
 
 function parteDelDiaCard(day){
   const today = todayISO();
+  const tomas = allTomaDays();
+  const idx = tomas.indexOf(day);
+  const prev = idx > 0 ? tomas[idx-1] : null;
+  const next = (idx >= 0 && idx < tomas.length-1) ? tomas[idx+1] : null;
+  const isLast = idx === tomas.length-1;
   const entries = visibleEntries().filter(e=>e.date===day);
   const byP = new Map(entries.map(e=>[e.playerId,e]));
   const alerts = alertsFor(day);
@@ -1451,10 +1467,9 @@ function parteDelDiaCard(day){
       if(!!a.e !== !!b.e) return a.e ? -1 : 1;
       return a.p.name.localeCompare(b.p.name,'es');
     });
-  const nextDay = addDays(day,1);
   const alertHTML = alerts.length
     ? `<div class="alerts">${alerts.map(a=>`<button type="button" class="alert-chip ${a.type==='period'?'period':a.type==='sleep'?'sleep':''}" data-action="open-player" data-player="${esc(a.playerId)}" title="Abrir ficha"><i class="dot"></i>${esc(a.text)}</button>`).join('')}</div>`
-    : `<div class="alerts-empty">Sin alertas con los umbrales actuales.${missing.length?' Faltan '+missing.length+' respuesta'+(missing.length===1?'':'s')+'.':''}</div>`;
+    : `<div class="alerts-empty">Sin alertas con los umbrales actuales.${missing.length?' '+missing.length+' sin responder en esta toma.':''}</div>`;
   const rowHTML = rows.map(({p,e})=>{
     const avatar = `<span class="avatar">${esc(initials(p.name))}</span>`;
     if(!e) return `<tr class="muted"><td><div class="name-cell">${avatar}<span>${esc(p.name)}</span></div></td><td colspan="4">Sin respuesta</td><td class="num">—</td></tr>`;
@@ -1471,12 +1486,12 @@ function parteDelDiaCard(day){
   }).join('');
   return `<div class="card mb-14">
     <div class="card-head">
-      <div><h3>Parte del día</h3><div class="hint">${entries.length} de ${state.players.length} jugadoras han respondido${missing.length?' · faltan '+missing.length:''}</div></div>
+      <div><h3>Parte de la toma</h3><div class="hint">${entries.length} de ${state.players.length} jugadoras respondieron${missing.length?' · '+missing.length+' sin responder':''} · mañana posterior a sesión o partido</div></div>
       <div class="side">
-        <button type="button" class="btn btn-sm" data-action="day-prev" title="Día anterior">‹</button>
+        <button type="button" class="btn btn-sm" data-action="day-prev" ${prev?'':'disabled'} title="Toma anterior">‹</button>
         <span class="chip" style="border-color:rgba(255,122,26,.4);color:var(--text)">${fmtDay(day)}${day===today?' · hoy':''}</span>
-        <button type="button" class="btn btn-sm" data-action="day-next" ${nextDay<=today?'':'disabled'} title="Día siguiente">›</button>
-        ${day!==today?'<button type="button" class="btn btn-sm" data-action="day-today">Hoy</button>':''}
+        <button type="button" class="btn btn-sm" data-action="day-next" ${next?'':'disabled'} title="Toma siguiente">›</button>
+        ${!isLast?'<button type="button" class="btn btn-sm" data-action="day-today">Última toma</button>':''}
       </div>
     </div>
     ${alertHTML}
@@ -1494,7 +1509,7 @@ function heatmapCard(days){
   const seg = `<div class="seg">${metrics.map(([v,l])=>`<button type="button" data-action="metric" data-metric="${v}" class="${state.metric===v?'is-active':''}">${l}</button>`).join('')}</div>`;
   return `<div class="card mb-14">
     <div class="card-head">
-      <div><h3>Mapa diario del equipo</h3><div class="hint">Cada fila es una jugadora y cada columna un día. Pulsa una celda para abrir su ficha.</div></div>
+      <div><h3>Mapa del equipo por tomas</h3><div class="hint">Cada fila es una jugadora y cada columna una toma (día con respuestas). Los días sin envío no aparecen. Pulsa una celda para abrir su ficha.</div></div>
       <div class="side">${seg}</div>
     </div>
     <div class="hm-wrap">${heatmapHTML(days)}</div>
@@ -1503,10 +1518,13 @@ function heatmapCard(days){
 }
 
 function heatmapHTML(days){
-  if(!days.length) return '<div class="muted">Sin días que mostrar.</div>';
+  const set = tomaSet();
+  const tomaDays = (days||[]).filter(d=>set.has(d));
+  if(!tomaDays.length) return '<div class="muted">Sin días con respuesta que mostrar.</div>';
   const metric = state.metric;
   const maxDays = 60;
-  const viewDays = days.slice(-maxDays);
+  const viewDays = tomaDays.slice(-maxDays);
+  const cellPx = viewDays.length <= 20 ? 34 : 27;
   const byKey = new Map();
   visibleEntries().forEach(e=>byKey.set(e.playerId+'|'+e.date, e));
   const months = [];
@@ -1516,7 +1534,7 @@ function heatmapHTML(days){
     months[months.length-1].span++;
   });
   const today = todayISO();
-  let h = `<div class="hm" style="grid-template-columns:148px repeat(${viewDays.length},27px)">`;
+  let h = `<div class="hm" style="grid-template-columns:148px repeat(${viewDays.length},${cellPx}px)">`;
   h += `<div class="hm-name hm-corner">Jugadora</div>`;
   months.forEach(seg=>{ h += `<div class="hm-month" style="grid-column:span ${seg.span}">${MONTHS[seg.m]}</div>`; });
   h += `<div class="hm-name" style="visibility:hidden"></div>`;
@@ -1551,7 +1569,7 @@ function heatmapHTML(days){
     });
   });
   h += '</div>';
-  if(days.length > maxDays) h += `<div class="scale" style="margin-top:6px"><span>Mostrando los últimos ${maxDays} días de ${days.length}. Cambia el periodo para acercar.</span></div>`;
+  if(tomaDays.length > maxDays) h += `<div class="scale" style="margin-top:6px"><span>Mostrando las últimas ${maxDays} tomas de ${tomaDays.length}. Cambia el periodo para acercar.</span></div>`;
   return h;
 }
 
@@ -1620,7 +1638,7 @@ function renderJugadoras(){
     }).join('');
   return `<div class="page">
     <div class="page-head">
-      <div><div class="eyebrow">Jugadoras</div><h1>Global por jugadora</h1><p>Evolución individual, molestias y ciclo. Elige una jugadora en la lista.</p></div>
+      <div><div class="eyebrow">Jugadoras</div><h1>Global por jugadora</h1><p>Evolución por tomas, molestias y ciclo menstrual. Elige una jugadora en la lista.</p></div>
       ${rangeSeg()}
     </div>
     <div class="jugadoras-layout">
@@ -1661,7 +1679,7 @@ function playerDetailHTML(p, st){
     </div>
     <div class="card mb-14">
       <div class="card-head">
-        <div><h3>Fatiga diaria</h3><div class="hint">Zonas: verde 1–4 · amarillo 5–6 · naranja 7–8 · rojo 9–10</div></div>
+        <div><h3>Fatiga por tomas</h3><div class="hint">Cada punto es una toma (día con respuesta). Zonas: verde 1–4 · amarillo 5–6 · naranja 7–8 · rojo 9–10</div></div>
         <div class="side"><label class="check"><input type="checkbox" data-action="compare-team" ${state.compareTeam?'checked':''}> Media del equipo</label></div>
       </div>
       <div class="chart" data-chart="player-fatigue"></div>
@@ -1674,7 +1692,7 @@ function playerDetailHTML(p, st){
     </div>
     <div class="grid-2 mb-14">
       <div class="card">
-        <div class="card-head"><div><h3>Calidad del sueño</h3><div class="hint">1 = muy mala · 5 = muy buena · umbral ${state.thresholds.sleepLow}</div></div></div>
+        <div class="card-head"><div><h3>Calidad del sueño</h3><div class="hint">Cada barra es una toma · 1 = muy mala · 5 = muy buena · umbral ${state.thresholds.sleepLow}</div></div></div>
         <div class="chart" data-chart="player-sleep"></div>
       </div>
       <div class="card">
@@ -1795,8 +1813,10 @@ function mountCharts(){
   });
 }
 function teamChartSVG(width, metric){
-  const days = getRangeDays();
-  const daily = dailyTeam(days);
+  const rangeDays = getRangeDays();
+  // Solo tomas: días en los que hubo alguna respuesta. Los días sin formulario no se dibujan.
+  const daily = dailyTeam(rangeDays).filter(d=>d.n>0);
+  const days = daily.map(d=>d.date);
   const values = daily.map(d=> metric==='fatigue' ? d.fatigue : d.sleep);
   if(!values.some(v=>v!=null)) return '';
   const H = 236, padL = 34, padR = 14, padT = 18, padB = 30;
@@ -1852,7 +1872,7 @@ function teamChartSVG(width, metric){
   return s;
 }
 function playerFatigueSVG(width, p){
-  const days = getRangeDays();
+  const days = tomaDaysInRange();
   if(!days.length) return '';
   const H = 250, padL = 34, padR = 14, padT = 16, padB = 30;
   const W = Math.max(320, width);
@@ -1929,7 +1949,7 @@ function playerFatigueSVG(width, p){
   return s;
 }
 function playerSleepSVG(width, p){
-  const days = getRangeDays();
+  const days = tomaDaysInRange();
   if(!days.length) return '';
   const H = 200, padL = 34, padR = 14, padT = 16, padB = 30;
   const W = Math.max(320, width);
@@ -2371,13 +2391,23 @@ document.addEventListener('click', ev=>{
     case 'metric': state.metric = el.dataset.metric; saveSettings(); render(); break;
     case 'select-player':
     case 'open-player': goPlayer(el.dataset.player); break;
-    case 'day-prev': state.day = addDays(state.day || todayISO(), -1); render(); break;
-    case 'day-next':{
-      const next = addDays(state.day || todayISO(), 1);
-      if(next <= todayISO()){ state.day = next; render(); }
+    case 'day-prev': {
+      const tomas = allTomaDays();
+      const idx = tomas.indexOf(state.day);
+      if(idx > 0){ state.day = tomas[idx-1]; render(); }
       break;
     }
-    case 'day-today': state.day = todayISO(); render(); break;
+    case 'day-next': {
+      const tomas = allTomaDays();
+      const idx = tomas.indexOf(state.day);
+      if(idx >= 0 && idx < tomas.length-1){ state.day = tomas[idx+1]; render(); }
+      break;
+    }
+    case 'day-today': {
+      const tomas = allTomaDays();
+      if(tomas.length){ state.day = tomas[tomas.length-1]; render(); }
+      break;
+    }
     case 'cal-prev': {
       const mk = state.calendarMonth || todayISO().slice(0,7);
       const parts = mk.split('-').map(Number);

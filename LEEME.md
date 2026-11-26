@@ -3,7 +3,7 @@
 Panel independiente para ver de forma gráfica las respuestas del formulario wellness de
 las jugadoras: **fatiga física, molestias, calidad del sueño y regla**.
 
-- **Versión:** 0.4 (26/11/2026) · publicada
+- **Versión:** 0.5 (26/11/2026) · publicada
 - **Tecnología:** un único `index.html` (HTML + CSS + JavaScript, sin librerías externas).
 - **Coste:** 0 €. No hay servidor propio ni base de datos en la nube.
 - **Estilo:** tema oscuro, interfaz en español, sin emojis, alineado con Huddle7.
@@ -32,24 +32,30 @@ tus datos reales: pestaña **Datos** → **Google Sheets** (recomendado) o **Arc
 
 ### Diario del equipo
 
-- **KPIs del periodo**: fatiga media, calidad del sueño, % de molestias, jugadoras con la
-  regla por día y participación de hoy, con comparación con el periodo anterior.
-- **Parte del día**: para una fecha concreta, quién ha respondido, sus valores, hora de
-  respuesta y las jugadoras que faltan. Incluye avisos automáticos (fatiga alta, sueño bajo,
-  molestias y, si se activa, regla).
-- **Evolución del equipo**: dos gráficas de líneas, fatiga media y sueño medio, con umbrales.
-- **Mapa diario**: matriz jugadora × día con cambio de métrica (fatiga, sueño, molestias,
-  regla). Una celda = una jugadora un día; al pulsarla se abre su ficha.
+Las jugadoras responden la **mañana siguiente a cada sesión o partido**, no todos los días.
+El panel trabaja con **tomas**: cada día con respuestas es una toma. Los días en los que no
+se envía el formulario no existen como dato (no cuentan como ausencias ni bajan las medias).
+
+- **KPIs del periodo**: fatiga media, calidad del sueño, % de molestias, % de respuestas con
+  la regla y participación en la última toma, con comparación con el periodo anterior.
+- **Parte de la toma**: quién ha respondido en una toma concreta, sus valores, hora de
+  respuesta y quién no ha respondido. Se navega de toma en toma (‹ ›), no por días naturales.
+  Incluye avisos automáticos (fatiga alta, sueño bajo, molestias y, si se activa, regla).
+- **Evolución del equipo**: dos gráficas de líneas con una **toma por punto**, fatiga media y
+  sueño medio, con umbrales.
+- **Mapa del equipo por tomas**: matriz jugadora × toma con cambio de métrica (fatiga, sueño,
+  molestias, regla). Una celda = una jugadora en una toma; al pulsarla se abre su ficha.
 - **Resumen por jugadora**: respuestas, medias, molestias, días de regla, última respuesta y
   una mini-evolución.
 
 ### Jugadoras
 
 - Lista con buscador, resumen y mini-gráfica de cada jugadora.
-- Ficha individual: KPIs, **fatiga diaria** con zonas de color, marcas de molestia y días de
-  regla, `media del equipo` opcional, **calidad del sueño** en barras, historial de molestias
-  y tarjeta de **ciclo menstrual**: calendario mensual con **punto rojo** en los días en que
-  respondió «sí» a la regla, además de último inicio, ciclo medio y próxima estimación.
+- Ficha individual: KPIs, **fatiga por tomas** con zonas de color, marcas de molestia y días de
+  regla, `media del equipo` opcional, **calidad del sueño** en barras (una barra por toma),
+  historial de molestias y tarjeta de **ciclo menstrual**: calendario mensual con **punto rojo**
+  en los días en que respondió «sí» a la regla, además de último inicio, ciclo medio y próxima
+  estimación.
 
 ### Datos
 
@@ -191,6 +197,10 @@ Reglas de lectura:
   («piernas y espalda», «rodilla derecha»…).
 - **Regla**: sí/no (también `Sí, rodilla` → sí + detalle, si no hay columna aparte).
 - **Fechas**: se admite el formato de Google Forms (`26/11/2026 8:32:05`).
+- **Tomas y días sin respuesta**: el formulario se envía la mañana siguiente a cada sesión o
+  partido. El panel solo cuenta los días con respuestas; los días sin envío no aparecen en
+  gráficas ni en el mapa, y no bajan las medias ni la participación. La navegación del parte
+  salta de toma en toma.
 - Si una jugadora responde dos veces el mismo día, se conserva **la última respuesta**.
 - Los nombres se normalizan (espacios, mayúsculas) y se agrupan por nombre; si quedan
   variantes, el panel ofrece unificarlas.
@@ -332,6 +342,10 @@ internas de desarrollo y no forman parte del sitio publicado.
 
 ## 12. Historial de versiones
 
+- **0.5 (26/11/2026)** — lógica de **tomas**: como las jugadoras responden la mañana
+  siguiente a cada sesión o partido, los días sin respuesta ya no cuentan. Las gráficas, el
+  mapa, el parte del día y la participación trabajan solo con días con respuestas, y el parte
+  navega de toma en toma.
 - **0.4 (26/11/2026)** — la tarjeta **Ciclo menstrual** pasa a ser un calendario mensual con
   punto rojo en los días de regla (con navegación entre meses y resumen de último inicio,
   ciclo medio y próxima estimación).
