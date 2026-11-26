@@ -3,7 +3,7 @@
 Panel independiente para ver de forma gráfica las respuestas del formulario wellness de
 las jugadoras: **fatiga física, molestias, calidad del sueño y regla**.
 
-- **Versión:** 0.2.1 (26/11/2026) · publicada
+- **Versión:** 0.3 (26/11/2026) · publicada
 - **Tecnología:** un único `index.html` (HTML + CSS + JavaScript, sin librerías externas).
 - **Coste:** 0 €. No hay servidor propio ni base de datos en la nube.
 - **Estilo:** tema oscuro, interfaz en español, sin emojis, alineado con Huddle7.
@@ -55,6 +55,9 @@ tus datos reales: pestaña **Datos** → **Google Sheets** (recomendado) o **Arc
 - Fuente: demo, Google Sheets (actualización automática) o CSV.
 - **Mapeo de columnas**: si el formulario cambia de nombre o de orden los campos, se corrige
   aquí con desplegables. El mapeo se guarda para la próxima vez.
+- **Nombres parecidos**: si una jugadora aparece con el nombre escrito de dos formas
+  («Nuria Pascual» y «Nuria Pascual Hernández»), el panel lo detecta y ofrece un botón para
+  unificarlas.
 - **Umbrales de aviso** configurables.
 - Nombre del equipo, exportación a JSON y borrado de la configuración.
 - Nota de privacidad y datos sensibles.
@@ -92,6 +95,10 @@ nueva versión de la implementación (**Implementar → Gestionar implementacion
   recoge en la siguiente lectura.
 - Al cerrar el panel no queda nada ejecutándose; al volver a abrirlo se actualiza otra vez.
   **En la integración con Huddle7** esto será automático también en segundo plano.
+
+- **Cambiar el formulario no requiere volver a sincronizar**: el script lee la hoja en vivo.
+  Si añades o quitas preguntas y aparece una columna nueva, revisa **Datos → Mapeo de columnas**
+  (el panel la detecta sola en la mayoría de los casos).
 
 ### Seguridad de la URL
 
@@ -168,8 +175,8 @@ No hay una conexión automática gratuita y sencilla. Opciones:
 |---|---|
 | Fecha / hora | `Marca temporal`, `Fecha`, `Timestamp` |
 | Jugadora | `Nombre`, `Jugadora`, `Nombre y apellidos` |
-| Fatiga física | `Fatiga física (1-10)`, `Fatiga`, `Nivel de fatiga` |
-| Molestias | `¿Tienes alguna molestia?`, `Molestias`, `Dolor` |
+| Fatiga física | `Fatiga física (1-10)`, `Fatiga`, `Nivel de fatiga`, y preguntas tipo «Indica cómo de cansada te encuentras físicamente…» |
+| Molestias | `¿Tienes alguna molestia?`, `Molestias`, `Dolor` (admite Sí/No o texto libre) |
 | Detalle de molestia | `Detalle de la molestia`, `¿Qué molestia?`, `Observaciones` |
 | Calidad del sueño | `Calidad del sueño (1-5)`, `Sueño`, `Descanso` |
 | Regla | `¿Tienes la regla?`, `Menstruación`, `Periodo` |
@@ -178,10 +185,14 @@ Reglas de lectura:
 
 - **Fatiga**: primer número entre 1 y 10.
 - **Sueño**: número entre 1 y 5; también acepta textos tipo «Muy mala … Muy buena».
-- **Molestias / regla**: sí/no (también `Sí, rodilla` → sí + detalle, si no hay columna aparte).
+- **Molestias**: sí/no; y si el formulario admite texto libre, cualquier respuesta que no sea
+  «No», «Ninguna» o similar se cuenta como molestia y el texto se guarda como detalle
+  («piernas y espalda», «rodilla derecha»…).
+- **Regla**: sí/no (también `Sí, rodilla` → sí + detalle, si no hay columna aparte).
 - **Fechas**: se admite el formato de Google Forms (`26/11/2026 8:32:05`).
 - Si una jugadora responde dos veces el mismo día, se conserva **la última respuesta**.
-- Los nombres se normalizan (espacios, mayúsculas) y se agrupan por nombre.
+- Los nombres se normalizan (espacios, mayúsculas) y se agrupan por nombre; si quedan
+  variantes, el panel ofrece unificarlas.
 
 ### Formulario recomendado
 
@@ -239,7 +250,8 @@ Si creas o revisas el formulario, con estos campos el panel funciona sin tocar e
 | «No se pudo conectar con la hoja» | URL termina en `/exec`; implementación activa; acceso «Cualquier persona»; autorización hecha. |
 | Conecta pero no aparecen los datos | La hoja tiene encabezados en la primera fila y respuestas debajo. |
 | Acentos raros | Guardar el CSV en UTF-8. |
-| Dos jugadoras aparecen por separado | El nombre está escrito distinto (mayúsculas, tildes, apellido). Mejor lista desplegable en el formulario. |
+| Dos jugadoras aparecen por separado | El nombre está escrito distinto. El panel lo detecta en **Datos → Nombres parecidos** y ofrece **Unificar**. Mejor aún: lista desplegable en el formulario. |
+| Cambio el formulario y aparece una columna nueva | No hay que volver a implementar nada: el script lee la hoja en vivo. Revisa **Datos → Mapeo de columnas**; si es la columna nueva del nombre, copia los nombres históricos a ella o avísame y lo ajusto. |
 | No detecta la fecha | Ir al mapeo y asignar manualmente la columna a **Fecha / hora**. |
 | Quiero empezar de cero | **Datos → Borrar configuración**. |
 
@@ -319,6 +331,10 @@ internas de desarrollo y no forman parte del sitio publicado.
 
 ## 12. Historial de versiones
 
+- **0.3 (26/11/2026)** — corrección de la lectura de datos: detección correcta de la pregunta
+  de fatiga (aunque mencione el sueño), molestias con texto libre («piernas y espalda»,
+  «rodilla derecha»…), elección de la columna más completa cuando hay columnas repetidas y
+  unificación de nombres parecidos con un botón.
 - **0.2.1 (26/11/2026)** — nombre del equipo por defecto: **Cadete Femenino** (se puede cambiar
   en Datos); el enlace de equipo incluye siempre el nombre del equipo.
 - **0.2 (26/11/2026)** — publicación en GitHub Pages

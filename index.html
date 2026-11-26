@@ -439,6 +439,7 @@ function fmtDay(s, opts={}){
 function daysBetween(a,b){ return Math.round((parseISO(b)-parseISO(a))/86400000); }
 function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function num1(v){ return (v==null || Number.isNaN(v)) ? '—' : String(Math.round(v*10)/10).replace('.',','); }
+function numDec(v){ return (v==null || Number.isNaN(v)) ? '—' : v.toFixed(1).replace('.',','); }
 function pct(v){ return (v==null || Number.isNaN(v)) ? '—' : Math.round(v*100)+'%'; }
 function clamp(v,a,b){ return Math.min(b,Math.max(a,v)); }
 function mean(arr){ const xs=(arr||[]).filter(v=>typeof v==='number'&&!Number.isNaN(v)); return xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null; }
@@ -719,6 +720,18 @@ function extraFromYes(value){
   const m = s.match(/^s[ií]\s*[,;:.\-–]?\s*(.+)$/i);
   return m ? m[1].trim() : '';
 }
+/* Molestias: acepta Sí/No, "ninguna", y también texto libre ("piernas, y espalda",
+   "En la rodilla derecha"...), que se cuenta como molestia y se guarda como detalle. */
+function parseDiscomfort(value){
+  const raw = String(value==null?'':value).trim();
+  const s = norm(raw);
+  if(!s) return {flag:null, note:''};
+  if(/^(no|ninguna|ninguno|nada|sin molestias|sin dolor|sin problemas|todo bien|perfecto|normal|no tengo|no hay)\b/.test(s)) return {flag:0, note:''};
+  if(/^si\b/.test(s)) return {flag:1, note:extraFromYes(raw)};
+  if(/^(0|false)$/.test(s)) return {flag:0, note:''};
+  if(/^(1|true)$/.test(s)) return {flag:1, note:''};
+  return {flag:1, note:raw};
+}
 const FIELD_KEYS = ['timestamp','player','fatigue','discomfort','note','sleep','period'];
 const FIELD_LABELS = {ignore:'Ignorar', timestamp:'Fecha / hora', player:'Jugadora', fatigue:'Fatiga física', discomfort:'Molestias', note:'Detalle de molestia', sleep:'Calidad del sueño', period:'Regla'};
 const FIELD_EXACT = [
@@ -734,23 +747,35 @@ function detectField(header){
   const n = norm(header);
   if(!n) return null;
   for(const [field, list] of FIELD_EXACT) if(list.includes(n)) return field;
-  if(/marca temporal|marca de tiempo|fecha|hora/.test(n)) return 'timestamp';
+  if(/marca temporal|marca de tiempo|fecha|hora|timestamp/.test(n)) return 'timestamp';
   if(/nombre|jugadora|deportista|quien/.test(n)) return 'player';
-  if(/detalle|describe|descripcion|observ|nota|comentario|que molestia|explica/.test(n)) return 'note';
-  if(/fatig|cansancio/.test(n)) return 'fatigue';
-  if(/suen|descans|dormid/.test(n)) return 'sleep';
-  if(/molest|dolor/.test(n)) return 'discomfort';
   if(/regla|menstrua|periodo/.test(n)) return 'period';
+  if(/detalle|describe|descripcion|observ|nota|comentario|explica/.test(n)) return 'note';
+  if(/molest|dolor/.test(n)) return 'discomfort';
+  // La fatiga se comprueba antes que el sueño: hay formularios que mencionan el sueño
+  // dentro de la pregunta de fatiga ("no relacionado con el sueño").
+  if(/fatig|cansad|cansancio|fisic|entrenamiento|partido|esfuerzo|recupera|energia/.test(n)) return 'fatigue';
+  if(/suen|descans|dormid|dormir/.test(n)) return 'sleep';
   return null;
 }
 function autoMap(headers, rows){
   const mapping = headers.map(()=>null);
-  const used = new Set();
+  // Cada campo puede tener varias columnas candidatas: nos quedamos con la más completa.
+  const candidates = {};
   headers.forEach((h,i)=>{
     const f = detectField(h);
-    if(f && !used.has(f)){ mapping[i]=f; used.add(f); }
+    if(f){ (candidates[f] = candidates[f] || []).push(i); }
   });
-  if(!used.has('timestamp') && rows && rows.length){
+  Object.keys(candidates).forEach(field=>{
+    let best = -1, bestScore = -1;
+    candidates[field].forEach(i=>{
+      const values = rows.slice(0, 200).map(r=>String((r||[])[i]==null?'':(r||[])[i]).trim()).filter(Boolean);
+      const score = values.length;
+      if(score > bestScore){ bestScore = score; best = i; }
+    });
+    if(best >= 0) mapping[best] = field;
+  });
+  if(!mapping.includes('timestamp') && rows && rows.length){
     for(let i=0;i<headers.length;i++){
       if(mapping[i]) continue;
       const sample = rows.slice(0,8).map(r=>r[i]).filter(v=>String(v==null?'':v).trim()!=='');
@@ -759,7 +784,7 @@ function autoMap(headers, rows){
   }
   return mapping;
 }
-function signatureOf(headers){ return norm(headers.join(' | ')).slice(0,140); }
+function signatureOf(headers){ return 'v2|' + norm(headers.join(' | ')).slice(0,140); }
 function savedMappingFor(headers){
   const sig = signatureOf(headers);
   const saved = state.savedMappings[sig];
@@ -777,7 +802,7 @@ function defaultState(){
     source:'demo', sourceUrl:'', sourceLabel:'Demo',
     autoRefreshSec:300, teamName:'',
     thresholds:Object.assign({}, DEFAULT_THRESHOLDS),
-    compareTeam:true, savedMappings:{}, excluded:[],
+    compareTeam:true, savedMappings:{}, excluded:[], playerAliases:{},
     entries:[], players:[], raw:null, mapping:null, pendingMeta:null,
     lastUpdated:null, loading:false, importInfo:null,
     day:todayISO(), selectedPlayer:null, playerQuery:'',
@@ -795,6 +820,7 @@ function loadSettings(){
     });
     if(s.thresholds && typeof s.thresholds==='object') state.thresholds = Object.assign({}, DEFAULT_THRESHOLDS, s.thresholds);
     if(s.savedMappings && typeof s.savedMappings==='object') state.savedMappings = s.savedMappings;
+    if(s.playerAliases && typeof s.playerAliases==='object') state.playerAliases = s.playerAliases;
     if(Array.isArray(s.excluded)) state.excluded = s.excluded;
     if(!['equipo','jugadoras','datos'].includes(state.view)) state.view='equipo';
     if(![7,14,30,'all'].includes(state.range)) state.range=14;
@@ -808,7 +834,7 @@ function saveSettings(){
       source:state.source, sourceUrl:state.sourceUrl, sourceLabel:state.sourceLabel,
       autoRefreshSec:state.autoRefreshSec, teamName:state.teamName,
       thresholds:state.thresholds, compareTeam:state.compareTeam,
-      savedMappings:state.savedMappings, excluded:state.excluded
+      savedMappings:state.savedMappings, excluded:state.excluded, playerAliases:state.playerAliases
     }));
   }catch(e){ /* almacenamiento no disponible */ }
 }
@@ -841,16 +867,28 @@ function restoreCache(data){
   state.day = pickDefaultDay();
 }
 function buildPlayers(entries){
+  const aliases = state.playerAliases || {};
   const map = new Map();
-  for(const e of entries){
-    let p = map.get(e.playerId);
-    if(!p){ p = {id:e.playerId, name:e.playerName, entries:[]}; map.set(e.playerId, p); }
+  for(const rawEntry of entries){
+    const al = aliases[rawEntry.playerId];
+    const playerId = al ? al.id : rawEntry.playerId;
+    const playerName = al ? al.name : rawEntry.playerName;
+    const e = Object.assign({}, rawEntry, {playerId, playerName});
+    let p = map.get(playerId);
+    if(!p){ p = {id:playerId, name:playerName, entries:[]}; map.set(playerId, p); }
     p.entries.push(e);
   }
   const players = Array.from(map.values()).filter(p=>!state.excluded.includes(p.id));
   players.forEach(p=>{
-    p.entries.sort((a,b)=> a.date===b.date ? (a.timeMs||0)-(b.timeMs||0) : a.date.localeCompare(b.date));
-    p.name = p.entries[p.entries.length-1].playerName || p.name;
+    // Si dos nombres unificados respondieron el mismo día, se queda la última respuesta.
+    const byDate = new Map();
+    for(const e of p.entries){
+      const prev = byDate.get(e.date);
+      if(!prev || (e.timeMs||0) >= (prev.timeMs||0)) byDate.set(e.date, e);
+    }
+    p.entries = Array.from(byDate.values())
+      .sort((a,b)=> a.date===b.date ? (a.timeMs||0)-(b.timeMs||0) : a.date.localeCompare(b.date));
+    if(p.entries.length) p.name = p.entries[p.entries.length-1].playerName || p.name;
   });
   players.sort((a,b)=> a.name.localeCompare(b.name,'es'));
   return players;
@@ -1034,17 +1072,33 @@ function applyMapping(opts={}){
   const idx = f => mapping.indexOf(f);
   const iTs=idx('timestamp'), iPlayer=idx('player'), iFat=idx('fatigue'), iSleep=idx('sleep'),
         iDis=idx('discomfort'), iNote=idx('note'), iPer=idx('period');
+  // Si el formulario cambia de pregunta de nombre, puede quedar una columna antigua y otra nueva.
+  const playerFallbacks = mapping.map((f,i)=> f==='player' && i!==iPlayer ? i : -1).filter(i=>i>=0);
   const byKey = new Map();
   let invalid = 0, dupes = 0;
   for(const row of raw.rows){
-    const name = titleName(String(row[iPlayer]==null?'':row[iPlayer]).trim());
+    let rawName = row[iPlayer];
+    if(!String(rawName==null?'':rawName).trim()){
+      for(const i of playerFallbacks){
+        if(String(row[i]==null?'':row[i]).trim()){ rawName = row[i]; break; }
+      }
+    }
+    const name = titleName(String(rawName==null?'':rawName).trim());
     const di = parseDateCell(row[iTs]);
     if(!name || !di){ invalid++; continue; }
     const fatigue = iFat>=0 ? parseScore(row[iFat],1,10) : null;
     const sleep = iSleep>=0 ? parseSleep(row[iSleep]) : null;
-    let discomfort = iDis>=0 ? parseYesNo(row[iDis]) : null;
-    let note = iNote>=0 ? String(row[iNote]==null?'':row[iNote]).trim() : '';
-    if(discomfort===1 && !note && iDis>=0) note = extraFromYes(row[iDis]);
+    let discomfort = null, note = '';
+    if(iDis>=0){
+      const parsed = parseDiscomfort(row[iDis]);
+      discomfort = parsed.flag;
+      note = parsed.note;
+    }
+    if(iNote>=0){
+      const extra = String(row[iNote]==null?'':row[iNote]).trim();
+      if(extra) note = extra;
+    }
+    if(discomfort==null && note) discomfort = 1;
     const period = iPer>=0 ? parseYesNo(row[iPer]) : null;
     const e = {
       playerName:name, playerId:slug(name), date:di.date, timeMs:di.timeMs||0,
@@ -1318,8 +1372,8 @@ function renderEquipo(){
 
   const kpis = `
     <div class="kpis">
-      ${kpiCard('Fatiga media', `${num1(st.fatigue)}<small>/10</small>`, `${deltaPill(fatDiff,'down')}<span>${st.n} respuestas · ${st.players} jugadoras</span>`)}
-      ${kpiCard('Calidad del sueño', `${num1(st.sleep)}<small>/5</small>`, `${deltaPill(sleepDiff,'up')}<span>Noches malas (≤${th.sleepLow}): ${pct(st.lowSleepPct)}</span>`)}
+      ${kpiCard('Fatiga media', `${numDec(st.fatigue)}<small>/10</small>`, `${deltaPill(fatDiff,'down')}<span>${st.n} respuestas · ${st.players} jugadoras</span>`)}
+      ${kpiCard('Calidad del sueño', `${numDec(st.sleep)}<small>/5</small>`, `${deltaPill(sleepDiff,'up')}<span>Noches malas (≤${th.sleepLow}): ${pct(st.lowSleepPct)}</span>`)}
       ${kpiCard('Molestias', `${pct(st.discomfortPct)}`, `<span>${st.discomfortPlayers} jugadoras · ${st.discomfortN} respuestas</span>`)}
       ${kpiCard('Con la regla', `${num1(st.periodAvg)}<small> jugadoras/día</small>`, `<span>${pct(st.periodPct)} de las respuestas · ${st.periodPlayers} jugadoras</span>`)}
       <div class="kpi"><div class="label">Parte de hoy</div><div class="value">${todayN}<small>/${state.players.length}</small></div><div class="progress"><i style="width:${(todayPct!=null?clamp(todayPct*100,0,100):0).toFixed(0)}%"></i></div><div class="sub"><span>${fmtDay(today)}</span><span class="muted">·</span><span>${pct(todayPct)} del equipo</span></div></div>
@@ -1564,8 +1618,8 @@ function playerDetailHTML(p, st){
       </div>
       <div class="mini-kpis">
         ${miniKpi('Respuestas', String(list.length), 'en el periodo')}
-        ${miniKpi('Fatiga media', `${num1(fatigue)}<small>/10</small>`, trend!=null?deltaPill(trend,'down')+' vs 7 d':'sin comparación')}
-        ${miniKpi('Sueño medio', `${num1(sleep)}<small>/5</small>`, 'calidad percibida')}
+        ${miniKpi('Fatiga media', `${numDec(fatigue)}<small>/10</small>`, trend!=null?deltaPill(trend,'down')+' vs 7 d':'sin comparación')}
+        ${miniKpi('Sueño medio', `${numDec(sleep)}<small>/5</small>`, 'calidad percibida')}
         ${miniKpi('Molestias', String(dis.length), dis.length?'registradas':'ninguna')}
         ${miniKpi('Días de regla', String(perDays), 'en el periodo')}
       </div>
@@ -1867,6 +1921,37 @@ function doGet(e) {
     .setMimeType(ContentService.MimeType.JSON);
 }`;
 
+function nameMergeSuggestions(){
+  const players = state.players || [];
+  const tokens = players.map(p=>({p, t:norm(p.name).split(' ').filter(Boolean)}));
+  const out = [];
+  for(let i=0;i<tokens.length;i++){
+    for(let j=i+1;j<tokens.length;j++){
+      const a = tokens[i], b = tokens[j];
+      const short = a.t.length <= b.t.length ? a : b;
+      const long = short === a ? b : a;
+      if(short.t.length>=2 && short.t.length<long.t.length && short.t.every((w,k)=> w===long.t[k])){
+        out.push({from:short.p, to:long.p});
+      }
+    }
+  }
+  return out;
+}
+function mergesCardHTML(){
+  if(state.source==='demo') return '';
+  const suggestions = nameMergeSuggestions();
+  if(!suggestions.length) return '';
+  return `<div class="card mb-14" id="mergesCard">
+    <div class="card-head">
+      <div><h3>Nombres parecidos</h3><div class="hint">Parecen la misma jugadora, pero el formulario guardó el nombre de dos formas. Unifícalas para que las medias salgan bien.</div></div>
+    </div>
+    ${suggestions.map(s=>`<div class="field-row">
+      <div>«<b>${esc(s.from.name)}</b>» <span class="muted">(${s.from.entries.length} respuesta${s.from.entries.length===1?'':'s'})</span> parece la misma que «<b>${esc(s.to.name)}</b>» <span class="muted">(${s.to.entries.length} respuestas)</span></div>
+      <button type="button" class="btn btn-sm" data-action="merge-player" data-from="${esc(s.from.id)}" data-to="${esc(s.to.id)}">Unificar</button>
+    </div>`).join('')}
+  </div>`;
+}
+
 function renderDatos(){
   const formSource = state.formSource || (state.source==='sheet' ? 'sheet' : state.source==='file' ? 'csv' : 'demo');
   return `<div class="page">
@@ -1882,6 +1967,7 @@ function renderDatos(){
       ${sourcePanelHTML(formSource)}
     </div>
     ${shareCardHTML()}
+    ${mergesCardHTML()}
     ${state.raw ? mappingCardHTML() : ''}
     <div class="grid-2 mt-14">
       ${thresholdsCardHTML()}
@@ -1970,13 +2056,13 @@ function previewRowHTML(row, mapping){
   const dt = parseDateCell(val('timestamp'));
   const fat = parseScore(val('fatigue'),1,10);
   const slp = parseSleep(val('sleep'));
-  const dis = parseYesNo(val('discomfort'));
+  const dis = parseDiscomfort(val('discomfort'));
   const per = parseYesNo(val('period'));
   const parts = [`<b>${esc(name||'—')}</b>`];
   if(dt) parts.push(fmtDay(dt.date,{wd:false,yr:true}));
   if(fat!=null) parts.push(`fatiga ${fat}/10`);
   if(slp!=null) parts.push(`sueño ${slp}/5`);
-  if(dis!=null) parts.push(`molestia: ${dis?'sí':'no'}`);
+  if(dis.flag!=null) parts.push(dis.flag ? `molestia: ${esc((dis.note||'sí').slice(0,42))}` : 'molestia: no');
   if(per!=null) parts.push(`regla: ${per?'sí':'no'}`);
   return `<div>${parts.join(' · ')}</div>`;
 }
@@ -1984,6 +2070,11 @@ function mappingCardHTML(){
   const {headers, rows} = state.raw;
   const needs = !requireColumns(state.mapping);
   const info = state.importInfo;
+  const missingFields = [];
+  if(!state.mapping.includes('fatigue')) missingFields.push('fatiga física');
+  if(!state.mapping.includes('sleep')) missingFields.push('calidad del sueño');
+  if(!state.mapping.includes('discomfort')) missingFields.push('molestias');
+  if(!state.mapping.includes('period')) missingFields.push('regla');
   const mapRows = headers.map((h,i)=>`<tr>
       <td>${esc(h||'(sin título)')}</td>
       <td><select class="select" data-action="map-field" data-index="${i}">${fieldOptionsHTML(state.mapping[i])}</select></td>
@@ -2002,6 +2093,7 @@ function mappingCardHTML(){
       <div class="side">${needs ? '<span class="tag tag-yes">Revisar</span>' : '<span class="tag" style="background:rgba(47,208,122,.14);color:#9ff0c1">Correcto</span>'}</div>
     </div>
     ${needs ? '<div class="warn-box" style="margin-bottom:10px">Falta asignar la columna de <b>fecha</b> o la de <b>jugadora</b>. Elige el campo correcto en cada fila.</div>' : ''}
+    ${missingFields.length ? `<div class="warn-box" style="margin-bottom:10px">No se ha detectado la columna de <b>${missingFields.join(', ')}</b>. Se mostrará vacía; asígnala manualmente en la tabla si tu formulario la tiene.</div>` : ''}
     <div class="table-wrap"><table class="map-table">
       <thead><tr><th>Columna del formulario</th><th>Campo del panel</th><th>Primer valor</th></tr></thead>
       <tbody>${mapRows}</tbody>
@@ -2049,10 +2141,12 @@ function configCardHTML(){
     </div>
     <div class="field-row"><div>Respuestas en memoria</div><span class="num">${state.entries.length}</span></div>
     <div class="field-row"><div>Jugadoras detectadas</div><span class="num">${state.players.length}</span></div>
+    <div class="field-row"><div>Nombres unificados</div><span class="num">${Object.keys(state.playerAliases||{}).length}</span></div>
     <div class="field-row"><div>Fuente actual</div><span class="num">${esc(state.source==='demo'?'Datos de ejemplo':state.source==='sheet'?'Google Sheets':'CSV')}</span></div>
     <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
       <button type="button" class="btn" data-action="export-json">Exportar JSON</button>
       <button type="button" class="btn" data-action="load-demo">Volver a demo</button>
+      ${Object.keys(state.playerAliases||{}).length ? '<button type="button" class="btn" data-action="clear-aliases">Deshacer unificaciones</button>' : ''}
       <button type="button" class="btn" data-action="reset-config">Borrar configuración</button>
     </div>
   </div>`;
@@ -2143,6 +2237,7 @@ function exportJSON(){
     exportedAt:new Date().toISOString(),
     team:teamLabel(),
     source:state.source,
+    playerAliases:state.playerAliases,
     entries:state.entries
   };
   downloadBlob('wellness-'+todayISO()+'.json', JSON.stringify(payload,null,2), 'application/json');
@@ -2195,6 +2290,31 @@ document.addEventListener('click', ev=>{
     case 'copy-share': {
       const link = buildShareLink();
       copyText(link).then(ok=> toast(ok ? 'Enlace para el equipo copiado al portapapeles.' : 'No se pudo copiar: selecciona el enlace y cópialo a mano.', ok?'ok':'warn'));
+      break;
+    }
+    case 'merge-player': {
+      const fromId = el.dataset.from, toId = el.dataset.to;
+      const target = state.players.find(p=>p.id===toId);
+      if(target && fromId && fromId!==toId){
+        state.playerAliases = Object.assign({}, state.playerAliases, {[fromId]:{id:toId, name:target.name}});
+        saveSettings();
+        state.players = buildPlayers(state.entries);
+        if(state.importInfo) state.importInfo.players = state.players.length;
+        state.selectedPlayer = toId;
+        saveCache();
+        render();
+        toast(`Jugadoras unificadas en «${target.name}».`,'ok');
+      }
+      break;
+    }
+    case 'clear-aliases': {
+      state.playerAliases = {};
+      saveSettings();
+      state.players = buildPlayers(state.entries);
+      if(state.importInfo) state.importInfo.players = state.players.length;
+      saveCache();
+      render();
+      toast('Unificaciones deshechas.','ok');
       break;
     }
     case 'load-sample': loadCSVText(SAMPLE_CSV, 'CSV de ejemplo'); break;
