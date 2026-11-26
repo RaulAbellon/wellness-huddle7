@@ -1024,14 +1024,38 @@ function fatigueTrend(p){
   if(recent==null || prev==null) return null;
   return recent - prev;
 }
+/* Un día sin respuesta entre dos «sí» se asume que seguía con la regla. Solo se une si
+   los días intermedios no tienen respuesta: si respondió «no», se respeta el no. */
+function canBridgePeriod(byDate, from, to){
+  const gap = daysBetween(from, to);
+  if(gap < 2 || gap > 3) return false;
+  for(let k=1;k<gap;k++){
+    const mid = byDate.get(addDays(from, k));
+    if(mid && mid.period===0) return false;
+  }
+  return true;
+}
+function periodDaySet(p){
+  const byDate = new Map(p.entries.map(e=>[e.date, e]));
+  const explicit = p.entries.filter(e=>e.period===1).map(e=>e.date).sort();
+  const set = new Set(explicit);
+  for(let i=1;i<explicit.length;i++){
+    const from = explicit[i-1], to = explicit[i];
+    if(canBridgePeriod(byDate, from, to)){
+      const gap = daysBetween(from, to);
+      for(let k=1;k<gap;k++) set.add(addDays(from, k));
+    }
+  }
+  return set;
+}
 function periodEpisodes(p){
+  const byDate = new Map(p.entries.map(e=>[e.date, e]));
   const dates = p.entries.filter(e=>e.period===1).map(e=>e.date).sort();
   const eps = [];
   for(const d of dates){
     const last = eps[eps.length-1];
-    // Se agrupan los «sí» separados por 1-2 días: suele ser un día sin respuesta en medio
-    // de la misma regla. Dos reglas distintas están a ~28 días, así que no se mezclan.
-    if(last && daysBetween(last.end, d) <= 2){
+    const gap = last ? daysBetween(last.end, d) : null;
+    if(last && (gap===1 || canBridgePeriod(byDate, last.end, d))){
       last.end = d;
       last.days = daysBetween(last.start, d) + 1;
     }else{
@@ -1592,7 +1616,7 @@ function resumenCard(st){
       fatigue:mean(list.map(e=>e.fatigue)),
       sleep:mean(list.map(e=>e.sleep)),
       dis:list.filter(e=>e.discomfort===1).length,
-      per:list.filter(e=>e.period===1).length,
+      per:[...periodDaySet(p)].filter(d=>d>=st.start && d<=st.end).length,
       last
     };
   }).sort((a,b)=> b.n-a.n || a.p.name.localeCompare(b.p.name,'es'));
@@ -1656,7 +1680,7 @@ function playerDetailHTML(p, st){
   const fatigue = mean(list.map(e=>e.fatigue));
   const sleep = mean(list.map(e=>e.sleep));
   const dis = list.filter(e=>e.discomfort===1);
-  const perDays = list.filter(e=>e.period===1).length;
+  const perDays = Array.from(periodDaySet(p)).filter(d=>d>=st.start && d<=st.end).length;
   const trend = fatigueTrend(p);
   const cycle = cycleInfo(p);
   const last = p.entries[p.entries.length-1];
@@ -1733,28 +1757,31 @@ function calendarCardHTML(p, cycle){
   if(state.calendarMonth > today.slice(0,7)) state.calendarMonth = today.slice(0,7);
   const mk = state.calendarMonth;
   const byDate = new Map(p.entries.map(e=>[e.date, e]));
+  const periodSet = periodDaySet(p);
   const weeks = calendarWeeks(mk);
   const head = ['L','M','X','J','V','S','D'].map(w=>`<span>${w}</span>`).join('');
   const weekHTML = weeks.map(week=>`<div class="cal-week">${week.map(date=>{
     if(!date) return '<div class="cal-day is-empty"></div>';
     const e = byDate.get(date);
-    const period = !!(e && e.period===1);
+    const explicitPeriod = !!(e && e.period===1);
+    const inferredPeriod = !explicitPeriod && periodSet.has(date);
+    const isPeriod = explicitPeriod || inferredPeriod;
     let tip = fmtDay(date,{wd:true});
     if(e){
-      tip += `\nRegla: ${period ? 'sí' : e.period===0 ? 'no' : 'sin dato'}`;
+      tip += `\nRegla: ${explicitPeriod ? 'sí' : e.period===0 ? 'no' : 'sin dato'}`;
       if(e.fatigue!=null) tip += `\nFatiga: ${e.fatigue}/10`;
       if(e.sleep!=null) tip += `\nCalidad del sueño: ${e.sleep}/5`;
       if(e.discomfort===1) tip += `\nMolestia: ${e.discomfortNote||'sí'}`;
     }else{
-      tip += '\nSin respuesta';
+      tip += inferredPeriod ? '\nRegla: sí (se asume: día sin respuesta entre dos «sí»)' : '\nSin respuesta';
     }
-    return `<div class="cal-day${e?' has-data':''}${period?' is-period':''}${date===today?' is-today':''}" data-tip="${esc(tip).replace(/\n/g,'&#10;')}"><span class="n">${parseInt(date.slice(8,10),10)}</span>${period?'<i class="cal-dot"></i>':''}</div>`;
+    return `<div class="cal-day${e?' has-data':''}${isPeriod?' is-period':''}${date===today?' is-today':''}" data-date="${date}" data-tip="${esc(tip).replace(/\n/g,'&#10;')}"><span class="n">${parseInt(date.slice(8,10),10)}</span>${isPeriod?'<i class="cal-dot"></i>':''}</div>`;
   }).join('')}</div>`).join('');
-  const periodInMonth = p.entries.filter(e=>e.date.startsWith(mk) && e.period===1).length;
+  const periodInMonth = Array.from(periodSet).filter(d=>d.startsWith(mk)).length;
   const currentMonth = today.slice(0,7);
   return `<div class="card">
       <div class="card-head">
-        <div><h3>Ciclo menstrual</h3><div class="hint">Punto rojo: días en los que respondió «sí» a la regla</div></div>
+        <div><h3>Ciclo menstrual</h3><div class="hint">Punto rojo: días con la regla. Si entre dos «sí» hay un día sin respuesta, se asume que seguía y también se marca.</div></div>
         <div class="side">
           <button type="button" class="btn btn-sm" data-action="cal-prev" title="Mes anterior">‹</button>
           <span class="chip" style="border-color:rgba(255,122,26,.35);color:var(--text)">${monthLabel(mk)}</span>
@@ -1773,7 +1800,7 @@ function calendarCardHTML(p, cycle){
             <span class="k"><i class="dot-red"></i>Día con la regla</span>
             <span class="k"><i class="dot-today"></i>Hoy</span>
           </div>
-          <p class="nota">${periodInMonth} día${periodInMonth===1?'':'s'} marcado${periodInMonth===1?'':'s'} en ${monthLabel(mk)}.${cycle.avg==null?' Con un solo ciclo registrado, el próximo inicio se estima usando 28 días como referencia.':''} La predicción es aproximada y no sustituye a lo que indique la jugadora.</p>
+          <p class="nota">${periodInMonth} día${periodInMonth===1?'':'s'} marcado${periodInMonth===1?'':'s'} en ${monthLabel(mk)} (incluye días sin respuesta entre dos «sí»).${cycle.avg==null?' Con un solo ciclo registrado, el próximo inicio se estima usando 28 días como referencia.':''} La predicción es aproximada y no sustituye a lo que indique la jugadora.</p>
         </div>
       </div>
     </div>`;
@@ -1882,6 +1909,7 @@ function playerFatigueSVG(width, p){
   const x = i => padL + (n>1 ? i*step : plotW/2);
   const y = v => padT + (1-((v-1)/9))*plotH;
   const byDate = new Map(p.entries.map(e=>[e.date,e]));
+  const periodSet = periodDaySet(p);
   const team = dailyTeam(days);
   const teamByDate = new Map(team.map(d=>[d.date,d]));
   let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Fatiga de ${esc(p.name)}">`;
@@ -1903,8 +1931,8 @@ function playerFatigueSVG(width, p){
   });
   const bandW = Math.max(6, Math.min(step*0.62, 16));
   days.forEach((d,i)=>{
-    const e = byDate.get(d);
-    if(e && e.period===1){
+    // También se marca el día sin respuesta entre dos «sí» (se asume que seguía).
+    if(periodSet.has(d)){
       const cx = x(i);
       s += `<rect x="${(cx-bandW/2).toFixed(1)}" y="${padT}" width="${bandW.toFixed(1)}" height="${plotH}" fill="rgba(167,139,250,.15)"/>`;
     }

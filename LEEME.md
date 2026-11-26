@@ -3,7 +3,7 @@
 Panel independiente para ver de forma gráfica las respuestas del formulario wellness de
 las jugadoras: **fatiga física, molestias, calidad del sueño y regla**.
 
-- **Versión:** 0.5 (26/11/2026) · publicada
+- **Versión:** 0.6 (26/11/2026) · publicada
 - **Tecnología:** un único `index.html` (HTML + CSS + JavaScript, sin librerías externas).
 - **Coste:** 0 €. No hay servidor propio ni base de datos en la nube.
 - **Estilo:** tema oscuro, interfaz en español, sin emojis, alineado con Huddle7.
@@ -54,8 +54,8 @@ se envía el formulario no existen como dato (no cuentan como ausencias ni bajan
 - Ficha individual: KPIs, **fatiga por tomas** con zonas de color, marcas de molestia y días de
   regla, `media del equipo` opcional, **calidad del sueño** en barras (una barra por toma),
   historial de molestias y tarjeta de **ciclo menstrual**: calendario mensual con **punto rojo**
-  en los días en que respondió «sí» a la regla, además de último inicio, ciclo medio y próxima
-  estimación.
+  en los días con la regla (si entre dos «sí» hay un día sin respuesta, se asume que seguía y
+  también se marca), además de último inicio, ciclo medio y próxima estimación.
 
 ### Datos
 
@@ -195,7 +195,9 @@ Reglas de lectura:
 - **Molestias**: sí/no; y si el formulario admite texto libre, cualquier respuesta que no sea
   «No», «Ninguna» o similar se cuenta como molestia y el texto se guarda como detalle
   («piernas y espalda», «rodilla derecha»…).
-- **Regla**: sí/no (también `Sí, rodilla` → sí + detalle, si no hay columna aparte).
+- **Regla**: sí/no (también `Sí, rodilla` → sí + detalle, si no hay columna aparte). Si entre
+  dos «sí» hay un día **sin respuesta**, se asume que seguía con la regla y ese día también se
+  marca con punto rojo en el calendario y la gráfica. Si respondió «no», se respeta el no.
 - **Fechas**: se admite el formato de Google Forms (`26/11/2026 8:32:05`).
 - **Tomas y días sin respuesta**: el formulario se envía la mañana siguiente a cada sesión o
   partido. El panel solo cuenta los días con respuestas; los días sin envío no aparecen en
@@ -342,6 +344,9 @@ internas de desarrollo y no forman parte del sitio publicado.
 
 ## 12. Historial de versiones
 
+- **0.6 (26/11/2026)** — si entre dos «sí» de la regla hay un día sin respuesta, se asume que
+  seguía con la regla: ese día también aparece con punto rojo en el calendario (y en las bandas
+  de la gráfica de fatiga). Si respondió «no», se respeta.
 - **0.5 (26/11/2026)** — lógica de **tomas**: como las jugadoras responden la mañana
   siguiente a cada sesión o partido, los días sin respuesta ya no cuentan. Las gráficas, el
   mapa, el parte del día y la participación trabajan solo con días con respuestas, y el parte
