@@ -3,20 +3,26 @@
 Panel independiente para ver de forma gráfica las respuestas del formulario wellness de
 las jugadoras: **fatiga física, molestias, calidad del sueño y regla**.
 
-- **Versión:** 0.1 (26/11/2026)
+- **Versión:** 0.2 (26/11/2026) · publicada
 - **Tecnología:** un único `index.html` (HTML + CSS + JavaScript, sin librerías externas).
 - **Coste:** 0 €. No hay servidor propio ni base de datos en la nube.
 - **Estilo:** tema oscuro, interfaz en español, sin emojis, alineado con Huddle7.
+- **Enlace publicado:** <https://raulabellon.github.io/wellness-huddle7/>
 
 ---
 
 ## 1. Abrir el panel
 
-1. Haz doble clic en `index.html` (se abre en el navegador; funciona sin instalación).
-2. La primera vez se cargan **datos de ejemplo** (13 jugadoras durante 5 semanas) para que
-   puedas probar todas las vistas sin configurar nada.
-3. Cuando quieras usar tus datos reales: pestaña **Datos** → **Google Sheets** (recomendado)
-   o **Archivo CSV**.
+Hay dos formas de abrirlo, con el mismo contenido:
+
+1. **Enlace publicado (recomendado para el equipo):**
+   <https://raulabellon.github.io/wellness-huddle7/>. Funciona en cualquier navegador y
+   dispositivo, sin instalar nada.
+2. **Archivo local:** doble clic en `index.html` (útil como copia de seguridad sin conexión).
+
+La primera vez se cargan **datos de ejemplo** (13 jugadoras durante 5 semanas) para que
+puedas probar todas las vistas sin configurar nada. Cuando quieras usar tus datos reales:
+pestaña **Datos** → **Google Sheets** (recomendado) o **Archivo CSV**.
 
 > El panel no modifica la hoja de respuestas: solo lee.
 
@@ -95,7 +101,44 @@ la nueva URL en el panel.
 
 ---
 
-## 4. Alternativa: cargar un CSV
+## 4. Compartir con el equipo técnico
+
+Una vez conectada la hoja de Google (apartado 3), el panel puede generar un enlace para que
+tus compañeros lo vean sin configurar nada:
+
+1. Abre el panel publicado: <https://raulabellon.github.io/wellness-huddle7/>
+2. Conecta tu hoja en **Datos → Google Sheets** (solo la primera vez en ese navegador).
+3. En **Datos → Compartir con el equipo técnico**, pulsa **Copiar enlace**.
+4. Manda ese enlace por un canal interno (WhatsApp del cuerpo técnico, correo del club…).
+
+Quien abra el enlace verá el panel ya conectado a la hoja, con actualización automática cada
+5 minutos. No tiene que configurar nada.
+
+> **Importante:** ese enlace contiene la dirección privada de Apps Script. Cualquiera que lo
+> tenga puede leer las respuestas de la hoja. No lo publiques en redes ni en grupos abiertos;
+> si se filtra, crea una nueva implementación de Apps Script y genera un enlace nuevo.
+
+El enlace *sin* datos (el del apartado 1) solo muestra los datos de ejemplo, así que también
+puedes compartirlo sin riesgo para que vean cómo funciona el panel.
+
+### Publicación y actualizaciones
+
+El panel está publicado como sitio estático en GitHub Pages:
+<https://raulabellon.github.io/wellness-huddle7/> (repositorio
+<https://github.com/RaulAbellon/wellness-huddle7>). El repositorio es público y solo contiene
+la aplicación, la plantilla y la documentación: **no contiene respuestas ni datos de
+jugadoras**. Para actualizar el panel hay que subir el nuevo `index.html` a ese repositorio;
+el enlace se actualiza solo en uno o dos minutos.
+
+### Si más adelante queréis acceso restringido
+
+Para que solo entren personas autorizadas (por ejemplo, con correo de Google) habría que
+poner el panel detrás de un servicio de acceso (Cloudflare Access con un dominio propio) o
+integrarlo en Huddle7, que ya será local. Se puede añadir cuando lo necesitéis.
+
+---
+
+## 5. Alternativa: cargar un CSV
 
 - Google Sheets: **Archivo → Descargar → Valores separados por comas (.csv)**.
 - Excel: guardar la hoja como CSV.
@@ -119,7 +162,7 @@ No hay una conexión automática gratuita y sencilla. Opciones:
 
 ---
 
-## 5. Columnas que espera el panel
+## 6. Columnas que espera el panel
 
 | Campo del panel | Nombres de columna que reconoce |
 |---|---|
@@ -155,12 +198,15 @@ Si creas o revisas el formulario, con estos campos el panel funciona sin tocar e
 
 ---
 
-## 6. Privacidad y datos sensibles
+## 7. Privacidad y datos sensibles
 
 - Fatiga, molestias, sueño y **regla** son **datos de salud** (categoría especial, art. 9
   RGPD). La información de la regla es especialmente sensible.
 - **Todo se queda en tu equipo**: el panel es un archivo local, sin servidor propio. La
   única nube es tu propia cuenta de Google, donde ya están las respuestas del formulario.
+- **El panel publicado** es solo la aplicación (HTML): no lleva respuestas dentro. Los datos
+  se leen en el navegador de cada persona desde tu hoja de Google. Aun así, el enlace de
+  equipo del apartado 4 lleva dentro la dirección privada de la hoja.
 - **Informa a las jugadoras** de qué se recoge, para qué, durante cuánto tiempo y quién lo
   ve; pide su consentimiento. Si hay menores, con el consentimiento de sus tutores.
 - **Limita el acceso**: cuerpo técnico que lo necesite, URL de Apps Script privada, CSV fuera
@@ -172,7 +218,7 @@ Si creas o revisas el formulario, con estos campos el panel funciona sin tocar e
 
 ---
 
-## 7. Límites conocidos de esta versión
+## 8. Límites conocidos de esta versión
 
 - No es multiusuario ni sincroniza entre dispositivos: vive en el navegador de un equipo.
 - Solo lectura: no se puede editar una respuesta desde el panel (se corrige en la hoja).
@@ -186,7 +232,7 @@ Si creas o revisas el formulario, con estos campos el panel funciona sin tocar e
 
 ---
 
-## 8. Solución de problemas
+## 9. Solución de problemas
 
 | Síntoma | Comprobación |
 |---|---|
@@ -209,7 +255,7 @@ días, cambia el mapa y carga el CSV de ejemplo. Debe terminar sin errores.
 
 ---
 
-## 9. Siguiente paso: integrarlo en Huddle7
+## 10. Siguiente paso: integrarlo en Huddle7
 
 Este panel es la primera entrega (independiente) acordada antes de tocar Huddle7. La
 integración propuesta:
@@ -253,7 +299,7 @@ navegador pasando, y los datos de wellness sobreviven al reinicio sin romper
 
 ---
 
-## 10. Archivos del proyecto
+## 11. Archivos del proyecto
 
 | Archivo | Contenido |
 |---|---|
@@ -262,12 +308,21 @@ navegador pasando, y los datos de wellness sobreviven al reinicio sin romper
 | `apps-script/Code.gs` | Script para pegar en Google Sheets y conectar la hoja. |
 | `LEEME.md` | Esta guía. |
 | `qa/test-panel.js` | Prueba funcional automática con Chrome headless. |
-| `qa/*.png` | Capturas de las vistas (Diario, Jugadoras, Datos y pruebas de CSV). |
+| `qa/test-publicado.js` | Prueba de la versión publicada en GitHub Pages y del enlace de equipo. |
+| `qa/*.png` | Capturas de las vistas (Diario, Jugadoras, Datos, CSV y versión publicada). |
+
+Versión publicada: <https://raulabellon.github.io/wellness-huddle7/> · repositorio:
+<https://github.com/RaulAbellon/wellness-huddle7>. Los archivos de `qa/` son pruebas
+internas de desarrollo y no forman parte del sitio publicado.
 
 ---
 
-## 11. Historial de versiones
+## 12. Historial de versiones
 
+- **0.2 (26/11/2026)** — publicación en GitHub Pages
+  (<https://raulabellon.github.io/wellness-huddle7/>), enlace para compartir el panel conectado
+  con el equipo técnico, carga automática de la fuente con `?fuente=`, guía ampliada y QA de
+  la versión publicada.
 - **0.1 (26/11/2026)** — primera entrega: panel independiente con datos de ejemplo, conexión
   a Google Sheets con actualización automática, importación y mapeo de CSV, dos vistas
   (equipo y jugadora), alertas configurable y documentación completa.
