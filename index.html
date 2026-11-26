@@ -1,0 +1,2401 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>Wellness · Huddle7</title>
+<style>
+:root{
+  --bg:#070b12; --bg-2:#0b121e; --surface:#101a2a; --surface-2:#142136; --surface-3:#1a2a44;
+  --border:#263650; --border-soft:rgba(38,52,77,.68);
+  --text:#eef4fc; --muted:#9aaac1; --muted-2:#71839b;
+  --accent:#ff7a1a; --accent-2:#ff4a3d; --accent-soft:rgba(255,122,26,.13);
+  --green:#2fd07a; --blue:#6ea8fe; --violet:#a78bfa; --red:#ff4a3d; --yellow:#ffc53d;
+  --radius:14px; --shadow:0 18px 44px rgba(0,0,0,.3);
+  font-family:"Segoe UI",Inter,system-ui,-apple-system,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{
+  background:radial-gradient(1200px 620px at 42% -10%, rgba(34,57,87,.30), transparent 70%), var(--bg);
+  color:var(--text); font-size:13px; line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+a{color:var(--accent)}
+::selection{background:rgba(255,122,26,.32)}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2b3d58;border-radius:10px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#3a5175}
+
+/* ---------- Cabecera ---------- */
+.topbar{
+  position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:20px;height:64px;
+  padding:0 22px;border-bottom:1px solid var(--border-soft);
+  background:rgba(7,11,18,.84);backdrop-filter:blur(14px);
+}
+.brand{display:flex;align-items:center;gap:11px;min-width:238px}
+.brand-mark{
+  width:38px;height:38px;flex:none;border-radius:11px;display:grid;place-items:center;
+  font-size:14px;font-weight:900;color:#ffd6b6;
+  border:1px solid rgba(255,122,26,.45);
+  background:linear-gradient(145deg,rgba(255,122,26,.28),rgba(255,74,61,.14));
+  box-shadow:0 8px 18px rgba(255,74,61,.14), inset 0 1px 0 rgba(255,255,255,.09);
+}
+.brand-title{font-size:14px;font-weight:800;letter-spacing:-.01em;white-space:nowrap}
+.brand-title span{color:var(--accent);font-weight:700}
+.brand-sub{font-size:10.5px;color:var(--muted-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:238px}
+.tabs{display:flex;gap:3px;padding:4px;border-radius:11px;border:1px solid var(--border-soft);background:rgba(16,26,42,.55)}
+.tab{
+  border:0;background:transparent;border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:700;
+  color:var(--muted);transition:background .15s,color .15s,box-shadow .15s;white-space:nowrap;
+}
+.tab:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.tab.is-active{background:var(--accent-soft);color:#ffb27a;box-shadow:inset 0 0 0 1px rgba(255,122,26,.35)}
+.top-actions{margin-left:auto;display:flex;align-items:center;gap:10px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;
+  border:1px solid var(--border);background:rgba(16,26,42,.7);font-size:10px;font-weight:700;color:var(--muted);
+  white-space:nowrap;
+}
+.chip .dot{width:6px;height:6px;border-radius:50%;background:var(--muted);flex:none}
+.chip.is-demo .dot{background:var(--accent);box-shadow:0 0 8px rgba(255,122,26,.8)}
+.chip.is-live .dot{background:var(--green);box-shadow:0 0 8px rgba(47,208,122,.8)}
+.chip.is-file .dot{background:var(--blue);box-shadow:0 0 8px rgba(110,168,254,.8)}
+.updated{font-size:10.5px;color:var(--muted-2);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- Botones y controles ---------- */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:7px 11px;border-radius:9px;
+  border:1px solid var(--border);background:var(--surface-2);color:var(--text);
+  font-size:11px;font-weight:700;transition:border-color .15s,background .15s,transform .05s;white-space:nowrap;
+}
+.btn svg{width:13px;height:13px;flex:none}
+.btn:hover{border-color:rgba(255,122,26,.5);background:var(--surface-3)}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn-primary{
+  border-color:transparent;background:linear-gradient(135deg,#ff8a2e,#ff5a2e);color:#1b0b02;
+  box-shadow:0 8px 18px rgba(255,90,46,.24);
+}
+.btn-primary:hover{background:linear-gradient(135deg,#ff9844,#ff6a3c);border-color:transparent}
+.btn-ghost{background:transparent}
+.btn-sm{padding:5px 9px;font-size:10.5px;border-radius:8px}
+.btn.is-loading svg{animation:spin .9s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.seg{display:inline-flex;gap:3px;padding:3px;border-radius:9px;border:1px solid var(--border-soft);background:rgba(16,26,42,.8)}
+.seg button{
+  border:0;background:transparent;border-radius:7px;padding:5px 10px;font-size:10.5px;font-weight:700;color:var(--muted);
+  transition:background .15s,color .15s;
+}
+.seg button:hover{color:var(--text)}
+.seg button.is-active{background:var(--surface-3);color:var(--text)}
+.input{
+  width:100%;padding:8px 10px;border-radius:9px;border:1px solid var(--border);
+  background:rgba(9,15,26,.78);font-size:11.5px;outline:none;transition:border-color .15s;
+}
+.input:focus{border-color:rgba(255,122,26,.55)}
+.input::placeholder{color:var(--muted-2)}
+.select{
+  padding:5px 7px;border-radius:7px;border:1px solid var(--border);background:rgba(9,15,26,.82);
+  font-size:10.5px;outline:none;max-width:100%;
+}
+.select:focus{border-color:rgba(255,122,26,.55)}
+input[type="number"].input{width:76px}
+.check{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);cursor:pointer}
+.check input{accent-color:var(--accent);width:14px;height:14px}
+
+/* ---------- Estructura ---------- */
+.wrap{max-width:1560px;margin:0 auto;padding:22px 26px 56px}
+.page{animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px;flex-wrap:wrap}
+.page-head h1{font-size:20px;font-weight:800;letter-spacing:-.015em;margin:0}
+.page-head p{margin:4px 0 0;font-size:11.5px;color:var(--muted)}
+.eyebrow{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:800;margin-bottom:6px}
+.grid-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.grid-2-heavy{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:14px;align-items:start}
+.mt-14{margin-top:14px}
+.mb-14{margin-bottom:14px}
+
+/* ---------- Tarjetas ---------- */
+.card{
+  background:linear-gradient(180deg,rgba(18,30,49,.92),rgba(12,20,35,.95));
+  border:1px solid var(--border-soft);border-radius:var(--radius);padding:16px 17px;min-width:0;
+}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
+.card-head h3{margin:0;font-size:12.5px;font-weight:800;letter-spacing:.005em}
+.card-head .hint{font-size:10px;color:var(--muted-2);margin-top:2px}
+.card-head .side{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.card-head .side .seg button{padding:4px 8px;font-size:10px}
+
+/* ---------- KPIs ---------- */
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.kpi{
+  position:relative;overflow:hidden;min-width:0;padding:14px 15px;border-radius:var(--radius);
+  background:linear-gradient(180deg,rgba(20,33,54,.92),rgba(13,22,38,.94));
+  border:1px solid var(--border-soft);
+}
+.kpi::after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,var(--accent),transparent 72%);opacity:.5}
+.kpi .label{font-size:9.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted-2);font-weight:800}
+.kpi .value{font-size:25px;font-weight:800;line-height:1.15;margin-top:6px;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kpi .value small{font-size:12px;font-weight:600;color:var(--muted)}
+.kpi .sub{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:10.5px;color:var(--muted);margin-top:5px}
+.delta{font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;white-space:nowrap}
+.delta.bad{color:#ffb4ae;background:rgba(255,74,61,.14)}
+.delta.good{color:#9ff0c1;background:rgba(47,208,122,.13)}
+.delta.flat{color:var(--muted);background:rgba(154,170,193,.1)}
+.progress{height:5px;border-radius:4px;background:rgba(255,255,255,.06);margin-top:8px;overflow:hidden}
+.progress i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#ffb15e,var(--accent))}
+
+/* ---------- Gráficas ---------- */
+.chart{width:100%;min-height:190px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart-empty{display:grid;place-items:center;min-height:190px;color:var(--muted-2);font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;font-size:10px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend .dash{display:inline-block;width:14px;height:0;border-top:1px dashed var(--muted-2);margin-right:5px;vertical-align:3px}
+
+/* ---------- Parte del día ---------- */
+.alerts{display:flex;flex-wrap:wrap;gap:7px;margin:2px 0 12px}
+.alert-chip{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:8px;font-size:10.5px;font-weight:700;
+  border:1px solid rgba(255,74,61,.35);background:rgba(255,74,61,.1);color:#ffc1bb;cursor:pointer;
+}
+.alert-chip:hover{border-color:rgba(255,74,61,.7)}
+.alert-chip.period{border-color:rgba(167,139,250,.42);background:rgba(167,139,250,.1);color:#d6c9ff}
+.alert-chip.sleep{border-color:rgba(110,168,254,.4);background:rgba(110,168,254,.1);color:#c3dbff}
+.alert-chip .dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.alerts-empty{font-size:11px;color:var(--muted-2);padding:2px 0 10px}
+
+/* ---------- Tablas ---------- */
+.table-wrap{overflow:auto;border-radius:10px;border:1px solid rgba(38,52,77,.5)}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+thead th{
+  position:sticky;top:0;z-index:2;background:#122035;text-align:left;white-space:nowrap;
+  font-size:9.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted-2);font-weight:800;
+  padding:9px 11px;border-bottom:1px solid var(--border-soft);
+}
+tbody td{padding:8px 11px;border-bottom:1px solid rgba(38,52,77,.34);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+tr.clickable{cursor:pointer}
+.name-cell{display:flex;align-items:center;gap:9px;font-weight:700;white-space:nowrap}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted-2)}
+.pill{
+  display:inline-flex;align-items:center;justify-content:center;min-width:28px;padding:3px 8px;border-radius:7px;
+  font-size:10.5px;font-weight:800;font-variant-numeric:tabular-nums;
+}
+.pill-period{background:rgba(167,139,250,.18);color:#d8ccff}
+.tag{font-size:9.5px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.06);color:var(--muted)}
+.tag-yes{background:rgba(255,74,61,.16);color:#ffb4ae}
+.tag-no{background:rgba(255,255,255,.05);color:var(--muted-2)}
+.tag-period{background:rgba(167,139,250,.18);color:#d8ccff}
+.days-cell{display:flex;gap:3px;flex-wrap:wrap}
+.day-dot{width:9px;height:9px;border-radius:3px;background:rgba(255,255,255,.07)}
+.day-dot.on{background:var(--violet)}
+
+/* ---------- Mapa diario ---------- */
+.hm-wrap{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}
+.hm{display:grid;gap:3px;grid-auto-rows:27px;min-width:max-content;align-items:stretch}
+.hm-name{
+  position:sticky;left:0;z-index:3;display:flex;align-items:center;padding:0 9px 0 2px;
+  font-size:10.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:#0d1829;box-shadow:8px 0 12px rgba(0,0,0,.28);border-radius:5px;
+}
+.hm-corner{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-2);font-weight:800;background:transparent;box-shadow:none;z-index:4}
+.hm-month{
+  display:flex;align-items:center;justify-content:flex-start;padding-left:4px;
+  font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-2);
+  border-left:1px solid rgba(255,255,255,.06);overflow:hidden;white-space:nowrap;
+}
+.hm-date{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:var(--muted-2);background:transparent}
+.hm-date b{font-size:9px;font-weight:800;color:var(--muted);line-height:1.1}
+.hm-date span{font-size:7.5px;line-height:1.1;color:var(--muted-2)}
+.hm-date.is-today b{color:var(--accent)}
+.hm-date.is-today{background:rgba(255,122,26,.07);border-radius:5px}
+.hm-cell{
+  border-radius:5px;display:grid;place-items:center;font-size:9.5px;font-weight:800;
+  color:rgba(255,255,255,.95);cursor:pointer;transition:filter .12s;
+}
+.hm-cell:hover{filter:brightness(1.25)}
+.hm-cell.is-empty{background:rgba(255,255,255,.03);cursor:default}
+.hm-cell.is-empty:hover{filter:none}
+.hm-cell.is-today{box-shadow:inset 0 0 0 1px rgba(255,122,26,.5)}
+.hm-cell .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+.scale{display:flex;align-items:center;gap:9px;margin-top:10px;font-size:9.5px;color:var(--muted-2)}
+.scale .bar{height:8px;width:164px;border-radius:5px;border:1px solid rgba(255,255,255,.06)}
+.scale .bar.fatigue{background:linear-gradient(90deg,rgb(22,58,42),rgb(35,110,74),rgb(166,133,44),rgb(226,111,36),rgb(223,65,58),rgb(214,38,72))}
+.scale .bar.sleep{background:linear-gradient(90deg,rgb(214,38,72),rgb(226,111,36),rgb(176,141,44),rgb(74,160,104),rgb(47,208,122))}
+
+/* ---------- Jugadoras ---------- */
+.jugadoras-layout{display:grid;grid-template-columns:296px minmax(0,1fr);gap:14px;align-items:start}
+.player-list-card{padding:12px}
+.player-search{position:relative;margin-bottom:8px}
+.player-search svg{position:absolute;left:9px;top:9px;width:12px;height:12px;color:var(--muted-2)}
+.player-search .input{padding-left:26px;font-size:11px}
+.player-list{max-height:calc(100vh - 268px);overflow:auto;padding-right:2px}
+.player-item{
+  display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:9px;align-items:center;
+  padding:8px;border-radius:10px;border:1px solid transparent;cursor:pointer;transition:background .14s,border-color .14s;
+}
+.player-item:hover{background:rgba(255,255,255,.035)}
+.player-item.is-active{border-color:rgba(255,122,26,.4);background:var(--accent-soft)}
+.player-item .pn{font-size:11.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-item .ps{font-size:9.5px;color:var(--muted-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player-item .spark{flex:none;opacity:.9}
+.avatar{
+  width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;
+  font-size:10.5px;font-weight:900;color:#ffd9bd;letter-spacing:.02em;
+  background:linear-gradient(145deg,rgba(255,122,26,.35),rgba(255,74,61,.18));
+  border:1px solid rgba(255,122,26,.35);
+}
+.avatar.lg{width:46px;height:46px;font-size:14px;border-radius:15px}
+.detail-head{display:flex;align-items:center;gap:13px;margin-bottom:14px;flex-wrap:wrap}
+.detail-head h2{font-size:18px;margin:0;font-weight:800;letter-spacing:-.01em}
+.detail-head .sub{font-size:10.5px;color:var(--muted-2);margin-top:2px}
+.detail-head .side{margin-left:auto;display:flex;align-items:center;gap:8px}
+.mini-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.mini-kpi{padding:11px 12px;border-radius:11px;border:1px solid var(--border-soft);background:rgba(20,33,54,.55);min-width:0}
+.mini-kpi .label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-2);font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mini-kpi .value{font-size:18px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+.mini-kpi .value small{font-size:10px;color:var(--muted);font-weight:600}
+.mini-kpi .sub{font-size:9.5px;color:var(--muted-2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.event-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.event-list li{display:flex;gap:10px;align-items:flex-start;font-size:11px;padding-bottom:8px;border-bottom:1px solid rgba(38,52,77,.34)}
+.event-list li:last-child{border-bottom:0;padding-bottom:0}
+.event-list .date{flex:none;width:64px;color:var(--muted-2);font-size:10px;padding-top:1px}
+.event-list .txt{color:var(--text)}
+.cycle-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.cycle-stat{padding:10px 12px;border-radius:10px;border:1px solid var(--border-soft);background:rgba(167,139,250,.06)}
+.cycle-stat .label{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-2);font-weight:800}
+.cycle-stat .value{font-size:16px;font-weight:800;margin-top:3px}
+.cycle-stat .value small{font-size:9.5px;color:var(--muted);font-weight:600}
+.nota{font-size:10px;color:var(--muted-2);margin:10px 0 0;line-height:1.5}
+
+/* ---------- Datos / conexión ---------- */
+.source-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.source-option{
+  display:block;width:100%;text-align:left;padding:12px;border-radius:11px;border:1px solid var(--border);
+  background:rgba(16,26,42,.5);transition:border-color .15s,background .15s;
+}
+.source-option:hover{border-color:rgba(255,122,26,.35)}
+.source-option.is-active{border-color:rgba(255,122,26,.5);background:var(--accent-soft)}
+.source-option .t{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800}
+.source-option .t svg{width:13px;height:13px;color:var(--accent)}
+.source-option .d{font-size:10px;color:var(--muted-2);margin-top:4px;line-height:1.45}
+.dropzone{
+  border:1px dashed var(--border);border-radius:11px;padding:20px;text-align:center;font-size:11px;color:var(--muted);
+  background:rgba(9,15,26,.42);transition:border-color .15s,background .15s;cursor:pointer;display:block;
+}
+.dropzone:hover,.dropzone.is-over{border-color:rgba(255,122,26,.55);background:var(--accent-soft)}
+.source-panel{margin-top:12px;padding-top:12px;border-top:1px solid rgba(38,52,77,.4)}
+.source-panel .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.source-panel .row .input{flex:1 1 340px;min-width:220px}
+.form-note{font-size:10px;color:var(--muted-2);margin:8px 0 0;line-height:1.55}
+.form-note b{color:var(--muted)}
+.status-line{display:flex;align-items:center;gap:8px;font-size:10.5px;color:var(--muted);margin-top:10px;min-height:17px}
+.status-line .ok{color:#9ff0c1}
+.status-line .err{color:#ffb4ae}
+details.help{border:1px solid rgba(38,52,77,.5);border-radius:10px;background:rgba(9,15,26,.35);margin-top:12px}
+details.help summary{padding:10px 12px;cursor:pointer;font-size:10.5px;font-weight:700;color:var(--muted);list-style:none}
+details.help summary::-webkit-details-marker{display:none}
+details.help summary::before{content:"+";display:inline-block;width:14px;color:var(--accent);font-weight:800}
+details.help[open] summary::before{content:"–"}
+details.help .help-body{padding:0 12px 12px;font-size:10.5px;color:var(--muted);line-height:1.65}
+details.help ol{margin:6px 0 10px;padding-left:18px}
+details.help li{margin-bottom:3px}
+pre.code{
+  max-height:300px;overflow:auto;margin:8px 0 0;padding:12px;border-radius:10px;border:1px solid var(--border-soft);
+  background:#0a1220;color:#b9c9df;font-family:Consolas,"Cascadia Mono",ui-monospace,monospace;
+  font-size:10px;line-height:1.55;white-space:pre;
+}
+.map-table{width:100%}
+.map-table td{padding:5px 6px;vertical-align:middle}
+.map-table td:first-child{font-size:11px;color:var(--muted);max-width:340px}
+.map-table td:nth-child(2){width:190px}
+.map-table .example{font-size:9.5px;color:var(--muted-2);max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.preview{margin-top:10px;padding:10px 12px;border-radius:9px;background:rgba(9,15,26,.5);border:1px solid rgba(38,52,77,.4);font-size:10.5px;color:var(--muted)}
+.preview b{color:var(--text)}
+.preview div{padding:2px 0}
+.import-summary{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px;font-size:10.5px;color:var(--muted)}
+.import-summary b{color:var(--text);font-size:12px}
+.import-summary .item{padding:8px 11px;border-radius:9px;border:1px solid rgba(38,52,77,.5);background:rgba(9,15,26,.4)}
+.kv{display:grid;grid-template-columns:1fr auto;gap:7px 12px;font-size:11px;align-items:center}
+.kv .k{color:var(--muted)}
+.field-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid rgba(38,52,77,.3);font-size:11.5px}
+.field-row:last-child{border-bottom:0}
+.field-row .desc{font-size:10px;color:var(--muted-2);margin-top:2px}
+.divider{height:1px;background:rgba(38,52,77,.45);margin:14px 0}
+.warn-box{padding:10px 12px;border-radius:9px;border:1px solid rgba(255,197,61,.35);background:rgba(255,197,61,.08);font-size:10.5px;color:#ffe2a6;line-height:1.55}
+.privacy p{margin:0 0 9px;font-size:10.5px;color:var(--muted);line-height:1.6}
+.privacy strong{color:var(--text)}
+
+/* ---------- Estados vacíos ---------- */
+.empty{padding:40px 24px;text-align:center}
+.empty h2{margin:6px 0 6px;font-size:17px}
+.empty p{margin:0 auto;max-width:430px;font-size:11.5px;color:var(--muted);line-height:1.6}
+.empty .actions{display:flex;gap:9px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+
+/* ---------- Tooltip, aviso, toast ---------- */
+.tooltip{
+  position:fixed;z-index:80;pointer-events:none;max-width:300px;padding:7px 9px;border-radius:8px;
+  border:1px solid var(--border);background:rgba(10,19,34,.96);box-shadow:var(--shadow);
+  font-size:10.5px;color:var(--text);white-space:pre-line;opacity:0;transform:translateY(4px);
+  transition:opacity .12s,transform .12s;line-height:1.5;
+}
+.tooltip.is-on{opacity:1;transform:none}
+.toast{
+  position:fixed;right:22px;bottom:22px;z-index:90;display:none;max-width:400px;padding:11px 14px;
+  border-radius:10px;border:1px solid var(--border);border-left:3px solid var(--accent);
+  background:#122035;box-shadow:var(--shadow);font-size:11.5px;line-height:1.5;
+}
+.toast.is-on{display:block;animation:toastIn .18s ease}
+.toast.ok{border-left-color:var(--green)}
+.toast.err{border-left-color:var(--red)}
+.toast.warn{border-left-color:var(--yellow)}
+@keyframes toastIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.errbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:100;padding:8px 16px;background:#7a1a1a;color:#ffe3e0;
+  font-size:11px;border-top:1px solid rgba(255,255,255,.15);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width:1280px){
+  .kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .mini-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:1020px){
+  .grid-2,.grid-2-heavy{grid-template-columns:1fr}
+  .jugadoras-layout{grid-template-columns:1fr}
+  .player-list{max-height:300px}
+  .topbar{height:auto;flex-wrap:wrap;padding:10px 14px;gap:10px}
+  .brand{min-width:0}
+  .top-actions{margin-left:auto}
+  .wrap{padding:16px 14px 44px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .source-options{grid-template-columns:1fr}
+  .cycle-stats{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">W</div>
+    <div>
+      <div class="brand-title">Wellness <span>· Huddle7</span></div>
+      <div class="brand-sub" id="teamLabel">Mi equipo</div>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Secciones">
+    <button class="tab" type="button" data-view="equipo">Diario del equipo</button>
+    <button class="tab" type="button" data-view="jugadoras">Jugadoras</button>
+    <button class="tab" type="button" data-view="datos">Datos</button>
+  </nav>
+  <div class="top-actions">
+    <span class="chip" id="sourceChip"><i class="dot"></i><span id="sourceChipText">Demo</span></span>
+    <span class="updated" id="updatedAt"></span>
+    <button class="btn btn-ghost" type="button" data-action="refresh" id="refreshBtn" title="Actualizar ahora">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+      <span>Actualizar</span>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="view"></main>
+<div class="tooltip" id="tooltip" role="tooltip"></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="errbar" id="errbar" hidden></div>
+
+<script>
+'use strict';
+/* =========================================================================
+   Wellness · Huddle7 — panel independiente de seguimiento diario
+   Datos 100% locales: demo, CSV o Google Sheets (Apps Script / CSV publicado)
+   ========================================================================= */
+
+/* ------------------------------ Utilidades ------------------------------ */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
+const pad = n => String(n).padStart(2,'0');
+const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const WD = ['D','L','M','X','J','V','S'];
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+function parseISO(s){ const p=String(s).split('-').map(Number); return new Date(p[0],(p[1]||1)-1,p[2]||1); }
+function addDays(s,n){ const d=parseISO(s); d.setDate(d.getDate()+n); return iso(d); }
+function todayISO(){ return iso(new Date()); }
+function fmtDay(s, opts={}){
+  if(!s) return '—';
+  const d = parseISO(s);
+  const wd = opts.wd===false ? '' : WD[d.getDay()]+' ';
+  const yr = opts.yr ? ' '+d.getFullYear() : '';
+  return `${wd}${d.getDate()} ${MONTHS[d.getMonth()]}${yr}`;
+}
+function daysBetween(a,b){ return Math.round((parseISO(b)-parseISO(a))/86400000); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function num1(v){ return (v==null || Number.isNaN(v)) ? '—' : String(Math.round(v*10)/10).replace('.',','); }
+function pct(v){ return (v==null || Number.isNaN(v)) ? '—' : Math.round(v*100)+'%'; }
+function clamp(v,a,b){ return Math.min(b,Math.max(a,v)); }
+function mean(arr){ const xs=(arr||[]).filter(v=>typeof v==='number'&&!Number.isNaN(v)); return xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null; }
+function uniq(arr){ return Array.from(new Set(arr)); }
+function norm(s){ return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim(); }
+function slug(s){ return norm(s).replace(/\s+/g,'-') || 'jugadora'; }
+function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+function xLabelIndices(n, target=7){
+  if(n<=0) return [];
+  const every = Math.max(1, Math.ceil(n/target));
+  const idx = [];
+  for(let i=0;i<n;i+=every) idx.push(i);
+  const last = idx[idx.length-1];
+  if(last !== n-1){
+    if((n-1) - last < every*0.6) idx[idx.length-1] = n-1;
+    else idx.push(n-1);
+  }
+  return idx;
+}
+function titleName(s){
+  const t = String(s??'').trim().replace(/\s+/g,' ');
+  if(!t) return '';
+  if(t !== t.toLowerCase()) return t;
+  const small = new Set(['de','del','la','las','los','y','e']);
+  return t.split(' ').map((w,i)=> (small.has(w)&&i>0) ? w : w.charAt(0).toUpperCase()+w.slice(1)).join(' ');
+}
+function initials(name){ const p=String(name||'').trim().split(/\s+/); return (((p[0]||'')[0]||'')+((p[1]||'')[0]||'')).toUpperCase() || '?'; }
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function timeLabel(ms){ if(!ms) return '—'; const d=new Date(ms); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function downloadBlob(filename, content, type){
+  const blob = new Blob([content], {type: type || 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    try{
+      const ta=document.createElement('textarea');
+      ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      return true;
+    }catch(_){ return false; }
+  }
+}
+
+/* Enlace para compartir el panel con el equipo técnico.
+   Codifica la URL privada de la fuente de datos en el propio enlace. */
+function encodeFuente(url){
+  const bytes = new TextEncoder().encode(String(url));
+  let bin = '';
+  bytes.forEach(b=>{ bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function decodeFuente(value){
+  const b64 = String(value).replace(/-/g,'+').replace(/_/g,'/');
+  const padded = b64 + '==='.slice((b64.length+3)%4);
+  const bin = atob(padded);
+  const bytes = Uint8Array.from(bin, c=>c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+function buildShareLink(){
+  const base = location.href.split('#')[0].split('?')[0];
+  const params = new URLSearchParams();
+  if(state.sourceUrl) params.set('fuente', encodeFuente(state.sourceUrl));
+  if(state.teamName) params.set('equipo', state.teamName);
+  const qs = params.toString();
+  return base + (qs ? '?' + qs : '') + '#equipo';
+}
+
+/* ---------------------------- Escalas de color --------------------------- */
+function rgbStr(rgb){ return `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`; }
+function rgbaStr(rgb,a){ return `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${a})`; }
+function stopColor(value, stops){
+  if(value <= stops[0][0]) return stops[0][1];
+  for(let i=1;i<stops.length;i++){
+    const [v1,c1] = stops[i-1];
+    const [v2,c2] = stops[i];
+    if(value <= v2){
+      const t = (value-v1)/((v2-v1)||1);
+      return [Math.round(c1[0]+(c2[0]-c1[0])*t), Math.round(c1[1]+(c2[1]-c1[1])*t), Math.round(c1[2]+(c2[2]-c1[2])*t)];
+    }
+  }
+  return stops[stops.length-1][1];
+}
+const FATIGUE_STOPS = [[1,[22,58,42]],[3,[35,110,74]],[5,[166,133,44]],[7,[226,111,36]],[9,[223,65,58]],[10,[214,38,72]]];
+const SLEEP_STOPS   = [[1,[214,38,72]],[2,[226,111,36]],[3,[176,141,44]],[4,[74,160,104]],[5,[47,208,122]]];
+function fatigueRgb(v){ return stopColor(v==null?0:v, FATIGUE_STOPS); }
+function fatigueColor(v){ return rgbStr(fatigueRgb(v)); }
+function sleepRgb(v){ return stopColor(v==null?0:v, SLEEP_STOPS); }
+function sleepColor(v){ return rgbStr(sleepRgb(v)); }
+function sleepLabel(v){ return ['','Muy mala','Mala','Regular','Buena','Muy buena'][v] || ''; }
+const ACCENT_RGB=[255,122,26], BLUE_RGB=[110,168,254], VIOLET_RGB=[167,139,250], RED_RGB=[255,74,61], GREEN_RGB=[47,208,122], MUTED_RGB=[154,170,193];
+function pillFatigue(v){
+  if(v==null) return '<span class="muted">—</span>';
+  const rgb = fatigueRgb(v);
+  return `<span class="pill" style="background:${rgbaStr(rgb,.22)};color:${rgbStr(rgb)};filter:brightness(1.5)">${v}</span>`;
+}
+function pillSleep(v){
+  if(v==null) return '<span class="muted">—</span>';
+  const rgb = sleepRgb(v);
+  return `<span class="pill" style="background:${rgbaStr(rgb,.22)};color:${rgbStr(rgb)};filter:brightness(1.5)">${v}</span>`;
+}
+
+/* ------------------------------ Datos de demo --------------------------- */
+const DEMO_PLAYERS = [
+  {name:'Lucía Ferrer',     fatigueBase:6.2, sleepBase:3.3, disRate:.10, story:'fatigue'},
+  {name:'Marta Sanz',       fatigueBase:4.4, sleepBase:3.8, disRate:.05},
+  {name:'Paula Ortiz',      fatigueBase:5.1, sleepBase:3.5, disRate:.05},
+  {name:'Alba Ruiz',        fatigueBase:4.7, sleepBase:3.2, disRate:.30, story:'knee'},
+  {name:'Nerea Vidal',      fatigueBase:3.9, sleepBase:3.6, disRate:.04, story:'period'},
+  {name:'Carla Domínguez',  fatigueBase:4.6, sleepBase:3.5, disRate:.05, story:'sleep'},
+  {name:'Irene Castro',     fatigueBase:3.2, sleepBase:3.9, disRate:.03},
+  {name:'Sofía Navarro',    fatigueBase:5.6, sleepBase:3.2, disRate:.08},
+  {name:'Claudia Romero',   fatigueBase:4.1, sleepBase:3.7, disRate:.04},
+  {name:'Marina Gil',       fatigueBase:5.0, sleepBase:3.4, disRate:.06},
+  {name:'Andrea Torres',    fatigueBase:3.6, sleepBase:3.8, disRate:.03},
+  {name:'Julia Benítez',    fatigueBase:4.9, sleepBase:3.1, disRate:.05},
+  {name:'Elena Márquez',    fatigueBase:4.3, sleepBase:3.6, disRate:.04}
+];
+const DEMO_NOTES = ['Sobrecarga en cuádriceps','Dolor en rodilla derecha','Molestia en tobillo izquierdo','Carga en lumbares','Dolor en hombro derecho','Ampollas en el pie','Tirón en gemelo','Contusión en la cadera'];
+function buildDemo(){
+  const today = todayISO();
+  const rand = mulberry32(20261126);
+  const players = DEMO_PLAYERS.map((def,idx)=>{
+    const cycleLen = 26 + Math.floor(rand()*7);
+    const offset = idx===4 ? 2 : Math.floor(rand()*cycleLen);
+    const ranges = [];
+    let start = addDays(today, -offset);
+    const first = addDays(today, -70);
+    while(start >= first){
+      ranges.push([start, addDays(start,4)]);
+      start = addDays(start, -cycleLen);
+    }
+    return Object.assign({}, def, {id:slug(def.name), cycleLen, ranges});
+  });
+  const entries = [];
+  for(let back=34; back>=0; back--){
+    const date = addDays(today,-back);
+    const dow = parseISO(date).getDay();
+    if(dow===0) continue; // sin respuesta dominical
+    players.forEach((p,idx)=>{
+      if(back===0 && (idx===10 || idx===11 || idx===12)) return; // hoy responden 10 de 13
+      if(back!==0 && rand() > 0.955) return;
+      const load = {1:.9,2:.5,3:.1,4:.7,5:.5,6:-.3}[dow] || 0;
+      let fatigue = p.fatigueBase + load + (rand()-.5)*1.7;
+      let sleep = p.sleepBase + (rand()-.5)*1.2;
+      let discomfort = 0, note = '';
+      if(p.story==='fatigue' && back<=8) fatigue += 1.7;
+      if(p.story==='sleep' && back<=7) sleep -= 1.1;
+      if(p.story==='knee' && back<=10 && rand()<.55){ discomfort=1; note='Dolor en la rodilla derecha'; }
+      else if(rand() < p.disRate){ discomfort=1; note=DEMO_NOTES[Math.floor(rand()*DEMO_NOTES.length)]; }
+      if(back===0){
+        if(p.story==='fatigue') fatigue = 9;
+        if(p.story==='sleep') sleep = 2;
+        if(p.story==='knee'){ discomfort = 1; note = 'Dolor en la rodilla derecha'; fatigue = Math.max(fatigue,6); }
+      }
+      const period = p.ranges.some(([a,b])=> date>=a && date<=b) ? 1 : 0;
+      const hour = 7 + Math.floor(rand()*3);
+      const minute = Math.floor(rand()*60);
+      entries.push({
+        playerName:p.name, playerId:p.id, date,
+        timeMs:new Date(`${date}T${pad(hour)}:${pad(minute)}:00`).getTime(),
+        fatigue:clamp(Math.round(fatigue),1,10), sleep:clamp(Math.round(sleep),1,5),
+        discomfort, discomfortNote:discomfort?note:'', period
+      });
+    });
+  }
+  return entries;
+}
+
+/* --------------------------- Lectura de CSV ----------------------------- */
+function detectDelimiter(text){
+  const line = text.split(/\r?\n/).find(l=>l.trim()!=='') || '';
+  const counts = {';':0, ',':0, '\t':0};
+  let inQ = false;
+  for(const ch of line){
+    if(ch==='"'){ inQ = !inQ; continue; }
+    if(inQ) continue;
+    if(ch in counts) counts[ch]++;
+  }
+  if(counts['\t'] > counts[';'] && counts['\t'] >= counts[','] && counts['\t']>0) return '\t';
+  return counts[';'] >= counts[','] ? ';' : ',';
+}
+function parseCSV(text){
+  text = String(text||'').replace(/^\uFEFF/,'');
+  const delim = detectDelimiter(text);
+  const rows = [];
+  let row = [], field = '', inQ = false, started = false;
+  for(let i=0;i<text.length;i++){
+    const c = text[i];
+    if(inQ){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQ = false;
+      } else field += c;
+      continue;
+    }
+    if(c === '"'){ inQ = true; started = true; continue; }
+    if(c === delim){ row.push(field); field=''; started = true; continue; }
+    if(c === '\r'){ continue; }
+    if(c === '\n'){
+      row.push(field); field='';
+      if(row.some(v=>String(v).trim()!=='')) rows.push(row);
+      row = []; started = false; continue;
+    }
+    field += c; started = true;
+  }
+  row.push(field);
+  if(row.some(v=>String(v).trim()!=='')) rows.push(row);
+  if(!rows.length) return {headers:[], rows:[]};
+  return {headers:rows[0].map(h=>String(h).trim()), rows:rows.slice(1)};
+}
+const RE_ISO = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s](\d{1,2}):(\d{2})(?::(\d{2}))?)?/;
+const RE_DMY = /^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})(?:[\s,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/;
+function parseDateCell(value){
+  const s = String(value==null?'':value).trim();
+  if(!s) return null;
+  let m = s.match(RE_ISO);
+  if(m){
+    const y=+m[1], mo=+m[2], d=+m[3];
+    if(mo>=1 && mo<=12 && d>=1 && d<=31){
+      const dt = new Date(y, mo-1, d, +(m[4]||0), +(m[5]||0), +(m[6]||0));
+      if(!Number.isNaN(dt.getTime())) return {date:iso(dt), timeMs:dt.getTime()};
+    }
+  }
+  m = s.match(RE_DMY);
+  if(m){
+    let a=+m[1], b=+m[2], y=+m[3];
+    if(y<100) y += 2000;
+    let day=a, month=b;
+    if(a<=12 && b>12){ day=b; month=a; }
+    const dt = new Date(y, month-1, day, +(m[4]||0), +(m[5]||0), +(m[6]||0));
+    if(!Number.isNaN(dt.getTime())) return {date:iso(dt), timeMs:dt.getTime()};
+  }
+  return null;
+}
+function parseScore(value, min, max){
+  const m = String(value==null?'':value).match(/(\d+(?:[.,]\d+)?)/);
+  if(!m) return null;
+  const n = parseFloat(m[1].replace(',','.'));
+  if(Number.isNaN(n) || n < min-0.4 || n > max+0.4) return null;
+  return clamp(Math.round(n), min, max);
+}
+function parseSleep(value){
+  const n = parseScore(value,1,5);
+  if(n!=null) return n;
+  const t = norm(value);
+  if(!t) return null;
+  if(/muy buena|excelente|muy bien/.test(t)) return 5;
+  if(/buena|bien/.test(t)) return 4;
+  if(/regular|normal/.test(t)) return 3;
+  if(/muy mala|fatal|malisima/.test(t)) return 1;
+  if(/mala|mal\b/.test(t)) return 2;
+  return null;
+}
+function parseYesNo(value){
+  const s = norm(value);
+  if(!s) return null;
+  if(/^(si|s|yes|y|1|true|verdadero|x|correcto)$/.test(s)) return 1;
+  if(/^(no|n|0|false|falso)$/.test(s)) return 0;
+  if(/^si\b/.test(s)) return 1;
+  if(/^no\b/.test(s)) return 0;
+  return null;
+}
+function extraFromYes(value){
+  const s = String(value==null?'':value).trim();
+  const m = s.match(/^s[ií]\s*[,;:.\-–]?\s*(.+)$/i);
+  return m ? m[1].trim() : '';
+}
+const FIELD_KEYS = ['timestamp','player','fatigue','discomfort','note','sleep','period'];
+const FIELD_LABELS = {ignore:'Ignorar', timestamp:'Fecha / hora', player:'Jugadora', fatigue:'Fatiga física', discomfort:'Molestias', note:'Detalle de molestia', sleep:'Calidad del sueño', period:'Regla'};
+const FIELD_EXACT = [
+  ['timestamp', ['marca temporal','marca de tiempo','fecha y hora','fecha de envio','fecha de envio del formulario','timestamp','fecha']],
+  ['player', ['nombre y apellidos','nombre completo','nombre jugadora','nombre de la jugadora','jugadora','nombre','deportista','quien eres']],
+  ['note', ['detalle de la molestia','detalle molestia','detalle','que molestia','descripcion de la molestia','descripcion molestia','explica la molestia','describe la molestia','observaciones','notas','comentario','cual']],
+  ['fatigue', ['fatiga fisica','fatiga fisica 1 10','fatiga','nivel de fatiga','cansancio','fatiga muscular']],
+  ['sleep', ['calidad del sueno','calidad de sueno','calidad sueno','calidad del sueno 1 5','sueno','calidad del descanso','descanso']],
+  ['discomfort', ['tienes alguna molestia','alguna molestia','tienes molestias','molestias','molestia','tienes algun dolor','dolor']],
+  ['period', ['tienes la regla','estas con la regla','tienes el periodo','menstruacion','regla','periodo']]
+];
+function detectField(header){
+  const n = norm(header);
+  if(!n) return null;
+  for(const [field, list] of FIELD_EXACT) if(list.includes(n)) return field;
+  if(/marca temporal|marca de tiempo|fecha|hora/.test(n)) return 'timestamp';
+  if(/nombre|jugadora|deportista|quien/.test(n)) return 'player';
+  if(/detalle|describe|descripcion|observ|nota|comentario|que molestia|explica/.test(n)) return 'note';
+  if(/fatig|cansancio/.test(n)) return 'fatigue';
+  if(/suen|descans|dormid/.test(n)) return 'sleep';
+  if(/molest|dolor/.test(n)) return 'discomfort';
+  if(/regla|menstrua|periodo/.test(n)) return 'period';
+  return null;
+}
+function autoMap(headers, rows){
+  const mapping = headers.map(()=>null);
+  const used = new Set();
+  headers.forEach((h,i)=>{
+    const f = detectField(h);
+    if(f && !used.has(f)){ mapping[i]=f; used.add(f); }
+  });
+  if(!used.has('timestamp') && rows && rows.length){
+    for(let i=0;i<headers.length;i++){
+      if(mapping[i]) continue;
+      const sample = rows.slice(0,8).map(r=>r[i]).filter(v=>String(v==null?'':v).trim()!=='');
+      if(sample.length && sample.filter(v=>parseDateCell(v)).length >= Math.ceil(sample.length*0.8)){ mapping[i]='timestamp'; break; }
+    }
+  }
+  return mapping;
+}
+function signatureOf(headers){ return norm(headers.join(' | ')).slice(0,140); }
+function savedMappingFor(headers){
+  const sig = signatureOf(headers);
+  const saved = state.savedMappings[sig];
+  return (Array.isArray(saved) && saved.length===headers.length) ? saved.slice() : null;
+}
+function requireColumns(mapping){ return mapping.includes('timestamp') && mapping.includes('player'); }
+
+/* -------------------------------- Estado -------------------------------- */
+const LS_KEY = 'huddle7.wellness.v1';
+const LS_CACHE = 'huddle7.wellness.cache.v1';
+const DEFAULT_THRESHOLDS = {fatigueHigh:8, sleepLow:2, discomfort:true, period:false};
+function defaultState(){
+  return {
+    view:'equipo', range:14, metric:'fatiga',
+    source:'demo', sourceUrl:'', sourceLabel:'Demo',
+    autoRefreshSec:300, teamName:'',
+    thresholds:Object.assign({}, DEFAULT_THRESHOLDS),
+    compareTeam:true, savedMappings:{}, excluded:[],
+    entries:[], players:[], raw:null, mapping:null, pendingMeta:null,
+    lastUpdated:null, loading:false, importInfo:null,
+    day:todayISO(), selectedPlayer:null, playerQuery:'',
+    formSource:null, connectionMsg:''
+  };
+}
+const state = defaultState();
+function loadSettings(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+    ['view','range','metric','source','sourceUrl','sourceLabel','autoRefreshSec','teamName','compareTeam'].forEach(k=>{
+      if(s[k] !== undefined && s[k] !== null) state[k] = s[k];
+    });
+    if(s.thresholds && typeof s.thresholds==='object') state.thresholds = Object.assign({}, DEFAULT_THRESHOLDS, s.thresholds);
+    if(s.savedMappings && typeof s.savedMappings==='object') state.savedMappings = s.savedMappings;
+    if(Array.isArray(s.excluded)) state.excluded = s.excluded;
+    if(!['equipo','jugadoras','datos'].includes(state.view)) state.view='equipo';
+    if(![7,14,30,'all'].includes(state.range)) state.range=14;
+    if(!['fatiga','sueno','molestias','regla'].includes(state.metric)) state.metric='fatiga';
+  }catch(e){ console.warn('Ajustes no disponibles', e); }
+}
+function saveSettings(){
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      view:state.view, range:state.range, metric:state.metric,
+      source:state.source, sourceUrl:state.sourceUrl, sourceLabel:state.sourceLabel,
+      autoRefreshSec:state.autoRefreshSec, teamName:state.teamName,
+      thresholds:state.thresholds, compareTeam:state.compareTeam,
+      savedMappings:state.savedMappings, excluded:state.excluded
+    }));
+  }catch(e){ /* almacenamiento no disponible */ }
+}
+function saveCache(){
+  try{
+    localStorage.setItem(LS_CACHE, JSON.stringify({
+      entries:state.entries, source:state.source, sourceUrl:state.sourceUrl,
+      sourceLabel:state.sourceLabel, teamName:state.teamName,
+      savedAt:Date.now(), importInfo:state.importInfo
+    }));
+  }catch(e){ /* almacenamiento no disponible */ }
+}
+function readCache(){
+  try{
+    const raw = localStorage.getItem(LS_CACHE);
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    return (data && Array.isArray(data.entries) && data.entries.length) ? data : null;
+  }catch(e){ return null; }
+}
+function restoreCache(data){
+  state.entries = data.entries;
+  state.players = buildPlayers(state.entries);
+  state.source = data.source || 'file';
+  state.sourceUrl = data.sourceUrl || '';
+  state.sourceLabel = data.sourceLabel || (state.source==='sheet'?'Google Sheets':'CSV');
+  if(!state.teamName && data.teamName) state.teamName = data.teamName;
+  state.lastUpdated = data.savedAt || null;
+  state.importInfo = data.importInfo || null;
+  state.day = pickDefaultDay();
+}
+function buildPlayers(entries){
+  const map = new Map();
+  for(const e of entries){
+    let p = map.get(e.playerId);
+    if(!p){ p = {id:e.playerId, name:e.playerName, entries:[]}; map.set(e.playerId, p); }
+    p.entries.push(e);
+  }
+  const players = Array.from(map.values()).filter(p=>!state.excluded.includes(p.id));
+  players.forEach(p=>{
+    p.entries.sort((a,b)=> a.date===b.date ? (a.timeMs||0)-(b.timeMs||0) : a.date.localeCompare(b.date));
+    p.name = p.entries[p.entries.length-1].playerName || p.name;
+  });
+  players.sort((a,b)=> a.name.localeCompare(b.name,'es'));
+  return players;
+}
+function loadDemoState(){
+  state.entries = buildDemo();
+  state.players = buildPlayers(state.entries);
+  state.source = 'demo'; state.sourceUrl=''; state.sourceLabel='Demo';
+  state.lastUpdated = null; state.importInfo = null;
+  state.raw = null; state.mapping = null; state.pendingMeta = null;
+  state.day = pickDefaultDay();
+}
+function visibleEntries(){ return state.players.flatMap(p=>p.entries); }
+function pickDefaultDay(){
+  if(!state.entries.length) return todayISO();
+  const today = todayISO();
+  if(state.entries.some(e=>e.date===today)) return today;
+  return state.entries[state.entries.length-1].date;
+}
+function teamLabel(){
+  if(state.teamName) return state.teamName;
+  return state.source==='demo' ? 'Juvenil Femenino' : 'Mi equipo';
+}
+
+/* -------------------------- Estadística básica -------------------------- */
+function getRangeDays(){
+  if(!state.entries.length) return [];
+  const today = todayISO();
+  let start;
+  if(state.range==='all'){
+    const first = state.entries[0].date;
+    const cap = addDays(today,-179);
+    start = first < cap ? cap : first;
+  }else{
+    start = addDays(today, -(Number(state.range)-1));
+  }
+  const days = [];
+  let cursor = start, guard = 0;
+  while(cursor <= today && guard < 400){ days.push(cursor); cursor = addDays(cursor,1); guard++; }
+  return days;
+}
+function dailyTeam(days){
+  const byDate = new Map();
+  for(const e of visibleEntries()){
+    if(!byDate.has(e.date)) byDate.set(e.date, []);
+    byDate.get(e.date).push(e);
+  }
+  return days.map(date=>{
+    const list = byDate.get(date) || [];
+    return {
+      date, list, n:list.length,
+      fatigue:mean(list.map(e=>e.fatigue)),
+      sleep:mean(list.map(e=>e.sleep)),
+      discomfort:list.filter(e=>e.discomfort===1).length,
+      period:list.filter(e=>e.period===1).length
+    };
+  });
+}
+function rangeStats(){
+  const days = getRangeDays();
+  if(!days.length) return null;
+  const start = days[0], end = days[days.length-1];
+  const list = visibleEntries().filter(e=>e.date>=start && e.date<=end);
+  const fatigueN = list.filter(e=>e.fatigue!=null).length;
+  const sleepN = list.filter(e=>e.sleep!=null).length;
+  const disList = list.filter(e=>e.discomfort===1);
+  const periodList = list.filter(e=>e.period===1);
+  const lowSleep = list.filter(e=>e.sleep!=null && e.sleep<=state.thresholds.sleepLow).length;
+  const activeDays = days.filter(d=>list.some(e=>e.date===d));
+  const periodAvg = mean(activeDays.map(d=>list.filter(e=>e.date===d && e.period===1).length));
+  let prev = null;
+  if(state.range!=='all'){
+    const n = Number(state.range);
+    const pEnd = addDays(start,-1);
+    const pStart = addDays(pEnd,-(n-1));
+    const plist = visibleEntries().filter(e=>e.date>=pStart && e.date<=pEnd);
+    if(plist.length) prev = {fatigue:mean(plist.map(e=>e.fatigue)), sleep:mean(plist.map(e=>e.sleep))};
+  }
+  return {
+    days, start, end, n:list.length,
+    players:uniq(list.map(e=>e.playerId)).length,
+    fatigue:mean(list.map(e=>e.fatigue)),
+    sleep:mean(list.map(e=>e.sleep)),
+    fatigueN, sleepN, lowSleep,
+    lowSleepPct: sleepN ? lowSleep/sleepN : null,
+    discomfortPct: list.length ? disList.length/list.length : null,
+    discomfortN: disList.length,
+    discomfortPlayers: uniq(disList.map(e=>e.playerId)).length,
+    periodPct: list.length ? periodList.length/list.length : null,
+    periodPlayers: uniq(periodList.map(e=>e.playerId)).length,
+    periodAvg,
+    prev
+  };
+}
+function fatigueTrend(p){
+  const today = todayISO();
+  const recent = mean(p.entries.filter(e=>e.date>=addDays(today,-6)).map(e=>e.fatigue));
+  const prev = mean(p.entries.filter(e=>e.date>=addDays(today,-13) && e.date<=addDays(today,-7)).map(e=>e.fatigue));
+  if(recent==null || prev==null) return null;
+  return recent - prev;
+}
+function periodEpisodes(p){
+  const dates = p.entries.filter(e=>e.period===1).map(e=>e.date).sort();
+  const eps = [];
+  for(const d of dates){
+    const last = eps[eps.length-1];
+    if(last && daysBetween(last.end,d)===1){ last.end=d; last.days++; }
+    else eps.push({start:d, end:d, days:1});
+  }
+  return eps;
+}
+function cycleInfo(p){
+  const eps = periodEpisodes(p);
+  const starts = eps.map(e=>e.start);
+  const lens = [];
+  for(let i=1;i<starts.length;i++) lens.push(daysBetween(starts[i-1],starts[i]));
+  const avg = mean(lens);
+  const dur = mean(eps.map(e=>e.days));
+  const last = eps[eps.length-1];
+  const next = last ? addDays(last.start, Math.round(avg || 28)) : null;
+  return {eps, lens, avg, dur, last, next};
+}
+function alertsFor(day){
+  const th = state.thresholds;
+  const out = [];
+  for(const e of visibleEntries().filter(x=>x.date===day)){
+    if(e.fatigue!=null && e.fatigue>=th.fatigueHigh)
+      out.push({type:'fatigue', playerId:e.playerId, text:`${e.playerName}: fatiga ${e.fatigue}/10`, sev:e.fatigue});
+    if(e.sleep!=null && e.sleep<=th.sleepLow)
+      out.push({type:'sleep', playerId:e.playerId, text:`${e.playerName}: sueño ${e.sleep}/5`, sev:10-e.sleep});
+    if(th.discomfort && e.discomfort===1)
+      out.push({type:'discomfort', playerId:e.playerId, text:`${e.playerName}: ${e.discomfortNote || 'molestia'}`, sev:9});
+    if(th.period && e.period===1)
+      out.push({type:'period', playerId:e.playerId, text:`${e.playerName}: con la regla`, sev:5});
+  }
+  const seen = new Set();
+  return out.filter(a=>{ const k=a.type+'|'+a.playerId; if(seen.has(k)) return false; seen.add(k); return true; })
+            .sort((a,b)=> b.sev-a.sev);
+}
+
+/* ------------------------- Carga e ingesta de datos ---------------------- */
+function setLoading(v){
+  state.loading = v;
+  const btn = $('#refreshBtn');
+  if(btn){ btn.disabled = v; btn.classList.toggle('is-loading', v); }
+}
+function loadDemo(){
+  loadDemoState();
+  state.formSource = null;
+  state.connectionMsg = '';
+  if(state.view==='datos') state.view = 'equipo';
+  saveSettings();
+  historySafeReplace(state.view);
+  render();
+  toast('Mostrando datos de ejemplo.','ok');
+}
+function processDataset(headers, rows, meta, opts={}){
+  headers = (headers||[]).map(h=>String(h==null?'':h).trim());
+  rows = (rows||[]).filter(r=>Array.isArray(r) && r.some(c=>String(c==null?'':c).trim()!==''));
+  if(!headers.length || !rows.length){
+    toast('El origen no contiene filas de datos.','err');
+    return false;
+  }
+  state.raw = {headers, rows};
+  state.pendingMeta = meta;
+  state.formSource = meta.kind==='sheet' ? 'sheet' : 'csv';
+  state.mapping = savedMappingFor(headers) || autoMap(headers, rows);
+  if(!requireColumns(state.mapping)){
+    if(opts.background) throw new Error('faltan columnas por asignar');
+    goView('datos');
+    toast('He leído los datos, pero falta asignar la fecha o la jugadora. Revisa el mapeo en Datos.','warn');
+    return false;
+  }
+  applyMapping({quiet:!!opts.background, resetView:!opts.background});
+  return true;
+}
+function applyMapping(opts={}){
+  const {raw, mapping, pendingMeta} = state;
+  if(!raw) return;
+  if(!requireColumns(mapping)){ toast('Asigna al menos las columnas de fecha y jugadora.','err'); return; }
+  const idx = f => mapping.indexOf(f);
+  const iTs=idx('timestamp'), iPlayer=idx('player'), iFat=idx('fatigue'), iSleep=idx('sleep'),
+        iDis=idx('discomfort'), iNote=idx('note'), iPer=idx('period');
+  const byKey = new Map();
+  let invalid = 0, dupes = 0;
+  for(const row of raw.rows){
+    const name = titleName(String(row[iPlayer]==null?'':row[iPlayer]).trim());
+    const di = parseDateCell(row[iTs]);
+    if(!name || !di){ invalid++; continue; }
+    const fatigue = iFat>=0 ? parseScore(row[iFat],1,10) : null;
+    const sleep = iSleep>=0 ? parseSleep(row[iSleep]) : null;
+    let discomfort = iDis>=0 ? parseYesNo(row[iDis]) : null;
+    let note = iNote>=0 ? String(row[iNote]==null?'':row[iNote]).trim() : '';
+    if(discomfort===1 && !note && iDis>=0) note = extraFromYes(row[iDis]);
+    const period = iPer>=0 ? parseYesNo(row[iPer]) : null;
+    const e = {
+      playerName:name, playerId:slug(name), date:di.date, timeMs:di.timeMs||0,
+      fatigue, sleep, discomfort, discomfortNote:note, period
+    };
+    const key = e.playerId+'|'+e.date;
+    const prev = byKey.get(key);
+    if(prev){ dupes++; if((e.timeMs||0) >= (prev.timeMs||0)) byKey.set(key,e); }
+    else byKey.set(key,e);
+  }
+  const entries = Array.from(byKey.values()).sort((a,b)=> a.date===b.date ? (a.timeMs||0)-(b.timeMs||0) : a.date.localeCompare(b.date));
+  if(!entries.length){ toast('No se ha podido leer ninguna respuesta. Revisa el mapeo de columnas.','err'); return; }
+  const meta = pendingMeta || {kind:'sheet', label:'Google Sheets'};
+  state.entries = entries;
+  state.players = buildPlayers(entries);
+  state.source = meta.kind==='demo' ? 'demo' : (meta.kind==='sheet' ? 'sheet' : 'file');
+  state.sourceUrl = meta.url || '';
+  state.sourceLabel = meta.label || (state.source==='sheet' ? 'Google Sheets' : state.source==='file' ? 'CSV' : 'Demo');
+  state.lastUpdated = Date.now();
+  state.importInfo = {
+    imported:entries.length, players:uniq(entries.map(e=>e.playerId)).length,
+    days:uniq(entries.map(e=>e.date)).length,
+    from:entries[0].date, to:entries[entries.length-1].date,
+    invalid, dupes, source:state.sourceLabel
+  };
+  state.savedMappings[signatureOf(raw.headers)] = mapping.slice();
+  state.day = pickDefaultDay();
+  if(state.selectedPlayer && !state.players.some(p=>p.id===state.selectedPlayer)) state.selectedPlayer = null;
+  saveSettings(); saveCache();
+  if(opts.resetView !== false){
+    state.view = 'equipo';
+    historySafeReplace('equipo');
+  }
+  render();
+  scheduleAutoRefresh();
+  if(!opts.quiet){
+    toast(`Datos cargados: ${entries.length} respuestas de ${state.importInfo.players} jugadoras (${fmtDay(state.importInfo.from,{wd:false})} – ${fmtDay(state.importInfo.to,{wd:false})}).`,'ok');
+  }
+}
+function parseDatasetText(text, label){
+  const trimmed = String(text||'').trim();
+  if(trimmed.startsWith('{') || trimmed.startsWith('[')){
+    let data;
+    try{ data = JSON.parse(trimmed); }catch(e){ throw new Error('JSON no válido'); }
+    const values = Array.isArray(data) ? data : (data && Array.isArray(data.values) ? data.values : null);
+    if(!values) throw new Error('el JSON no contiene la lista de filas');
+    return processDataset(values[0], values.slice(1), {kind:'file', label:label||'JSON'}, {});
+  }
+  const ds = parseCSV(text);
+  return processDataset(ds.headers, ds.rows, {kind:'file', label:label||'CSV'}, {});
+}
+function normalizeSheetUrl(url){
+  const u = String(url||'').trim();
+  if(!u) return u;
+  if(u.includes('/spreadsheets/d/e/')) return u; // URL publicada como CSV
+  const m = u.match(/docs\.google\.com\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  if(!m) return u;
+  if(u.includes('/gviz/') || u.includes('output=csv')) return u;
+  const gid = (u.match(/[?#&]gid=(\d+)/)||[])[1];
+  return `https://docs.google.com/spreadsheets/d/${m[1]}/gviz/tq?tqx=out:csv${gid?'&gid='+gid:''}`;
+}
+function jsonp(url, timeoutMs=25000){
+  return new Promise((resolve, reject)=>{
+    const cb = '__wellness_cb_' + Math.random().toString(36).slice(2);
+    const script = document.createElement('script');
+    let timer = null, done = false;
+    const cleanup = ()=>{
+      if(done) return;
+      done = true;
+      if(timer) clearTimeout(timer);
+      try{ delete window[cb]; }catch(e){ window[cb] = undefined; }
+      script.remove();
+    };
+    window[cb] = data => { cleanup(); resolve(data); };
+    script.onerror = () => { cleanup(); reject(new Error('no se pudo cargar la URL de Google')); };
+    const sep = url.includes('?') ? '&' : '?';
+    script.src = url + sep + 'callback=' + cb + '&_=' + Date.now();
+    document.head.appendChild(script);
+    timer = setTimeout(()=>{ cleanup(); reject(new Error('tiempo de espera agotado')); }, timeoutMs);
+  });
+}
+async function loadSheet(url, background=false, notify=false){
+  if(!url){ toast('Falta la URL de la hoja.','warn'); return; }
+  setLoading(true);
+  try{
+    let ds;
+    if(/script\.google\.com/i.test(url)){
+      let values = null;
+      try{
+        const data = await jsonp(url);
+        values = data && Array.isArray(data.values) ? data.values : (Array.isArray(data) ? data : null);
+      }catch(jsonpErr){
+        // Si el navegador bloquea el JSONP, probamos lectura directa (funciona si Apps Script permite CORS).
+        try{
+          const res = await fetch(url, {cache:'no-store'});
+          if(!res.ok) throw new Error('HTTP '+res.status);
+          const data = JSON.parse(await res.text());
+          values = data && Array.isArray(data.values) ? data.values : (Array.isArray(data) ? data : null);
+        }catch(fetchErr){
+          throw new Error(jsonpErr.message + ' / ' + fetchErr.message);
+        }
+      }
+      if(!values || !values.length) throw new Error('la respuesta de Apps Script no contiene filas');
+      ds = {headers:values[0], rows:values.slice(1)};
+    }else{
+      const target = normalizeSheetUrl(url);
+      const res = await fetch(target, {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const text = await res.text();
+      if(text.trim().startsWith('{')){
+        let data; try{ data = JSON.parse(text); }catch(e){ throw new Error('JSON no válido'); }
+        const values = data.values || data;
+        if(!Array.isArray(values)) throw new Error('formato inesperado');
+        ds = {headers:values[0], rows:values.slice(1)};
+      }else{
+        ds = parseCSV(text);
+      }
+    }
+    processDataset(ds.headers, ds.rows, {kind:'sheet', url, label:'Google Sheets'}, {background});
+    state.connectionMsg = 'Conectado y actualizando. Última lectura: ' + (new Date()).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+    saveSettings();
+    if(background) render();
+    if(background && notify) toast('Datos actualizados desde Google Sheets.','ok');
+  }catch(err){
+    state.connectionMsg = 'No se pudo conectar: ' + err.message;
+    console.warn('[wellness]', err);
+    if(!background || notify){
+      toast('No se pudo conectar con la hoja: ' + err.message + '. Revisa la URL o usa la importación CSV.','err');
+    }
+    render();
+  }finally{
+    setLoading(false);
+  }
+}
+function loadCSVFile(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const ok = parseDatasetText(String(reader.result), file.name);
+      if(ok) saveSettings();
+    }catch(err){
+      toast('No se pudo leer el archivo: '+err.message,'err');
+    }
+  };
+  reader.onerror = ()=> toast('No se pudo leer el archivo.','err');
+  reader.readAsText(file, 'utf-8');
+}
+function loadCSVText(text, label){
+  try{ return parseDatasetText(text, label); }
+  catch(err){ toast('No se pudo leer el CSV: '+err.message,'err'); return false; }
+}
+
+/* ------------------------- Datos de ejemplo CSV ------------------------- */
+const SAMPLE_CSV = `Marca temporal,Nombre,Fatiga física (1-10),¿Tienes alguna molestia?,Detalle de la molestia,Calidad del sueño (1-5),¿Tienes la regla?
+20/11/2026 08:12:00,Lucía Ferrer,5,,,4,No
+20/11/2026 08:20:00,Marta Sanz,4,,,4,Sí
+20/11/2026 08:31:00,Paula Ortiz,6,Sí,"Molestia en tobillo izquierdo",3,No
+20/11/2026 09:02:00,Alba Ruiz,7,Sí,"Dolor en rodilla derecha",2,No
+21/11/2026 08:05:00,Lucía Ferrer,7,,,3,No
+21/11/2026 08:15:00,Marta Sanz,5,,,4,No
+21/11/2026 08:24:00,Paula Ortiz,8,Sí,"Carga en lumbares",3,No
+21/11/2026 08:41:00,Alba Ruiz,7,Sí,"Dolor en rodilla derecha",2,No
+22/11/2026 08:03:00,Lucía Ferrer,9,,,2,No
+22/11/2026 08:19:00,Marta Sanz,4,,,5,No
+22/11/2026 08:28:00,Paula Ortiz,6,,,,4,No
+22/11/2026 08:35:00,Alba Ruiz,8,Sí,"Dolor en rodilla derecha",2,Sí
+23/11/2026 08:11:00,Lucía Ferrer,8,,,3,No
+23/11/2026 08:26:00,Marta Sanz,3,,,4,No
+23/11/2026 08:33:00,Paula Ortiz,5,,,4,No
+23/11/2026 08:47:00,Alba Ruiz,6,,,3,No
+24/11/2026 08:07:00,Lucía Ferrer,7,,,3,No
+24/11/2026 08:18:00,Marta Sanz,4,,,4,No
+24/11/2026 08:29:00,Paula Ortiz,4,,,5,No
+24/11/2026 08:39:00,Alba Ruiz,5,,,4,Sí
+25/11/2026 08:02:00,Lucía Ferrer,8,,,2,No
+25/11/2026 08:14:00,Marta Sanz,5,,,4,No
+25/11/2026 08:27:00,Paula Ortiz,4,,,4,No
+25/11/2026 08:45:00,Alba Ruiz,5,Sí,"Molestia en tobillo izquierdo",3,No
+26/11/2026 08:06:00,Lucía Ferrer,9,,,2,No
+26/11/2026 08:16:00,Marta Sanz,4,,,4,No
+26/11/2026 08:30:00,Paula Ortiz,5,,,3,No
+26/11/2026 08:44:00,Alba Ruiz,6,Sí,"Dolor en rodilla derecha",3,No`;
+
+/* =========================================================================
+   Render · cabecera y navegación
+   ========================================================================= */
+function updateChrome(){
+  $('#teamLabel').textContent = teamLabel();
+  $$('.tab').forEach(t=>t.classList.toggle('is-active', t.dataset.view===state.view));
+  const chip = $('#sourceChip'), chipText = $('#sourceChipText');
+  chip.classList.remove('is-demo','is-live','is-file');
+  if(state.source==='demo'){ chip.classList.add('is-demo'); chipText.textContent='Demo'; }
+  else if(state.source==='sheet'){ chip.classList.add('is-live'); chipText.textContent='Google Sheets'; }
+  else { chip.classList.add('is-file'); chipText.textContent = (state.sourceLabel && state.sourceLabel!=='CSV') ? state.sourceLabel : 'CSV'; }
+  chip.title = state.sourceUrl || (state.source==='demo' ? 'Datos de ejemplo generados en el navegador' : 'Archivo importado');
+  const upd = $('#updatedAt');
+  if(state.source==='demo') upd.textContent = 'Datos de ejemplo';
+  else if(state.lastUpdated) upd.textContent = 'Actualizado ' + new Date(state.lastUpdated).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'});
+  else upd.textContent = '—';
+  const btn = $('#refreshBtn');
+  if(btn){ btn.disabled = state.loading; btn.classList.toggle('is-loading', state.loading); }
+}
+function render(){
+  updateChrome();
+  let html;
+  if(state.view==='datos') html = renderDatos();
+  else if(!state.entries.length) html = renderEmpty();
+  else if(state.view==='jugadoras') html = renderJugadoras();
+  else html = renderEquipo();
+  $('#view').innerHTML = html;
+  mountCharts();
+}
+function renderEmpty(){
+  return `<div class="page"><div class="card empty">
+    <div class="eyebrow">Sin datos</div>
+    <h2>Todavía no hay respuestas cargadas</h2>
+    <p>Prueba el panel con un equipo de ejemplo, conecta tu hoja de Google o importa un CSV exportado desde el formulario.</p>
+    <div class="actions">
+      <button type="button" class="btn btn-primary" data-action="load-demo">Ver datos de ejemplo</button>
+      <button type="button" class="btn" data-action="goto-datos">Conectar mis datos</button>
+    </div>
+  </div></div>`;
+}
+function toast(msg, kind='ok'){
+  const el = $('#toast');
+  if(!el) return;
+  el.className = 'toast is-on ' + (kind==='err' ? 'err' : kind==='warn' ? 'warn' : 'ok');
+  el.textContent = msg;
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>{ el.className = 'toast'; }, kind==='err' ? 7000 : 4200);
+}
+function rangeSeg(){
+  const opts = [[7,'7 días'],[14,'14 días'],[30,'30 días'],['all','Todo']];
+  return `<div class="seg" role="group" aria-label="Periodo">${
+    opts.map(([v,label])=>`<button type="button" data-action="range" data-range="${v}" class="${String(state.range)===String(v)?'is-active':''}">${label}</button>`).join('')
+  }</div>`;
+}
+function kpiCard(label, valueHTML, subHTML){
+  return `<div class="kpi"><div class="label">${label}</div><div class="value">${valueHTML}</div><div class="sub">${subHTML||''}</div></div>`;
+}
+function deltaPill(diff, betterWhen){
+  if(diff==null || Math.abs(diff)<0.05) return '<span class="delta flat">sin cambio</span>';
+  const good = betterWhen==='down' ? diff<0 : diff>0;
+  return `<span class="delta ${good?'good':'bad'}">${diff>0?'▲':'▼'} ${num1(Math.abs(diff))}</span>`;
+}
+function miniKpi(label, valueHTML, subHTML){
+  return `<div class="mini-kpi"><div class="label">${label}</div><div class="value">${valueHTML}</div><div class="sub">${subHTML||'&nbsp;'}</div></div>`;
+}
+function searchIcon(){
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>`;
+}
+
+/* =========================================================================
+   Vista · Diario del equipo
+   ========================================================================= */
+function renderEquipo(){
+  const st = rangeStats();
+  if(!st) return renderEmpty();
+  const today = todayISO();
+  let day = state.day || today;
+  if(day > today) day = today;
+  const th = state.thresholds;
+  const fatDiff = (st.prev && st.prev.fatigue!=null && st.fatigue!=null) ? st.fatigue - st.prev.fatigue : null;
+  const sleepDiff = (st.prev && st.prev.sleep!=null && st.sleep!=null) ? st.sleep - st.prev.sleep : null;
+  const spanLabel = state.range==='all' ? `${st.days.length} días de historial` : `Últimos ${st.days.length} días`;
+  const compareLabel = state.range==='all' ? 'con todo el historial disponible' : 'comparado con el periodo anterior';
+  const todayList = visibleEntries().filter(e=>e.date===today);
+  const todayN = uniq(todayList.map(e=>e.playerId)).length;
+  const todayPct = state.players.length ? todayN/state.players.length : null;
+
+  const kpis = `
+    <div class="kpis">
+      ${kpiCard('Fatiga media', `${num1(st.fatigue)}<small>/10</small>`, `${deltaPill(fatDiff,'down')}<span>${st.n} respuestas · ${st.players} jugadoras</span>`)}
+      ${kpiCard('Calidad del sueño', `${num1(st.sleep)}<small>/5</small>`, `${deltaPill(sleepDiff,'up')}<span>Noches malas (≤${th.sleepLow}): ${pct(st.lowSleepPct)}</span>`)}
+      ${kpiCard('Molestias', `${pct(st.discomfortPct)}`, `<span>${st.discomfortPlayers} jugadoras · ${st.discomfortN} respuestas</span>`)}
+      ${kpiCard('Con la regla', `${num1(st.periodAvg)}<small> jugadoras/día</small>`, `<span>${pct(st.periodPct)} de las respuestas · ${st.periodPlayers} jugadoras</span>`)}
+      <div class="kpi"><div class="label">Parte de hoy</div><div class="value">${todayN}<small>/${state.players.length}</small></div><div class="progress"><i style="width:${(todayPct!=null?clamp(todayPct*100,0,100):0).toFixed(0)}%"></i></div><div class="sub"><span>${fmtDay(today)}</span><span class="muted">·</span><span>${pct(todayPct)} del equipo</span></div></div>
+    </div>`;
+
+  return `<div class="page">
+    <div class="page-head">
+      <div>
+        <div class="eyebrow">Wellness · Huddle7</div>
+        <h1>Diario del equipo</h1>
+        <p>Fatiga física, molestias, sueño y regla de cada jugadora, día a día. ${spanLabel}: ${fmtDay(st.start,{wd:false})} – ${fmtDay(st.end,{wd:false})} · ${compareLabel}.</p>
+      </div>
+      ${rangeSeg()}
+    </div>
+    ${kpis}
+    ${parteDelDiaCard(day)}
+    <div class="grid-2 mb-14">
+      <div class="card">
+        <div class="card-head"><div><h3>Fatiga media del equipo</h3><div class="hint">1 = fresca · 10 = agotada. Línea discontinua: umbral ${th.fatigueHigh}.</div></div></div>
+        <div class="chart" data-chart="team-fatigue"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Calidad del sueño del equipo</h3><div class="hint">1 = muy mala · 5 = muy buena. Línea discontinua: umbral ${th.sleepLow}.</div></div></div>
+        <div class="chart" data-chart="team-sleep"></div>
+      </div>
+    </div>
+    ${heatmapCard(st.days)}
+    ${resumenCard(st)}
+  </div>`;
+}
+
+function parteDelDiaCard(day){
+  const today = todayISO();
+  const entries = visibleEntries().filter(e=>e.date===day);
+  const byP = new Map(entries.map(e=>[e.playerId,e]));
+  const alerts = alertsFor(day);
+  const missing = state.players.filter(p=>!byP.has(p.id));
+  const rows = state.players.map(p=>({p, e:byP.get(p.id)}))
+    .sort((a,b)=>{
+      if(!!a.e !== !!b.e) return a.e ? -1 : 1;
+      return a.p.name.localeCompare(b.p.name,'es');
+    });
+  const nextDay = addDays(day,1);
+  const alertHTML = alerts.length
+    ? `<div class="alerts">${alerts.map(a=>`<button type="button" class="alert-chip ${a.type==='period'?'period':a.type==='sleep'?'sleep':''}" data-action="open-player" data-player="${esc(a.playerId)}" title="Abrir ficha"><i class="dot"></i>${esc(a.text)}</button>`).join('')}</div>`
+    : `<div class="alerts-empty">Sin alertas con los umbrales actuales.${missing.length?' Faltan '+missing.length+' respuesta'+(missing.length===1?'':'s')+'.':''}</div>`;
+  const rowHTML = rows.map(({p,e})=>{
+    const avatar = `<span class="avatar">${esc(initials(p.name))}</span>`;
+    if(!e) return `<tr class="muted"><td><div class="name-cell">${avatar}<span>${esc(p.name)}</span></div></td><td colspan="4">Sin respuesta</td><td class="num">—</td></tr>`;
+    const note = e.discomfort===1 ? `<span class="tag tag-yes" title="${esc(e.discomfortNote||'Sí')}">${esc((e.discomfortNote||'Sí').slice(0,38))}</span>` : (e.discomfort===0 ? '<span class="tag tag-no">No</span>' : '<span class="muted">—</span>');
+    const period = e.period===1 ? '<span class="tag tag-period">Sí</span>' : (e.period===0 ? '<span class="muted">No</span>' : '<span class="muted">—</span>');
+    return `<tr class="clickable" data-action="open-player" data-player="${esc(p.id)}">
+      <td><div class="name-cell">${avatar}<span>${esc(p.name)}</span></div></td>
+      <td>${pillFatigue(e.fatigue)}</td>
+      <td>${pillSleep(e.sleep)}</td>
+      <td>${note}</td>
+      <td>${period}</td>
+      <td class="muted num">${timeLabel(e.timeMs)}</td>
+    </tr>`;
+  }).join('');
+  return `<div class="card mb-14">
+    <div class="card-head">
+      <div><h3>Parte del día</h3><div class="hint">${entries.length} de ${state.players.length} jugadoras han respondido${missing.length?' · faltan '+missing.length:''}</div></div>
+      <div class="side">
+        <button type="button" class="btn btn-sm" data-action="day-prev" title="Día anterior">‹</button>
+        <span class="chip" style="border-color:rgba(255,122,26,.4);color:var(--text)">${fmtDay(day)}${day===today?' · hoy':''}</span>
+        <button type="button" class="btn btn-sm" data-action="day-next" ${nextDay<=today?'':'disabled'} title="Día siguiente">›</button>
+        ${day!==today?'<button type="button" class="btn btn-sm" data-action="day-today">Hoy</button>':''}
+      </div>
+    </div>
+    ${alertHTML}
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Jugadora</th><th>Fatiga</th><th>Sueño</th><th>Molestias</th><th>Regla</th><th>Hora</th></tr></thead>
+        <tbody>${rowHTML}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function heatmapCard(days){
+  const metrics = [['fatiga','Fatiga'],['sueno','Sueño'],['molestias','Molestias'],['regla','Regla']];
+  const seg = `<div class="seg">${metrics.map(([v,l])=>`<button type="button" data-action="metric" data-metric="${v}" class="${state.metric===v?'is-active':''}">${l}</button>`).join('')}</div>`;
+  return `<div class="card mb-14">
+    <div class="card-head">
+      <div><h3>Mapa diario del equipo</h3><div class="hint">Cada fila es una jugadora y cada columna un día. Pulsa una celda para abrir su ficha.</div></div>
+      <div class="side">${seg}</div>
+    </div>
+    <div class="hm-wrap">${heatmapHTML(days)}</div>
+    ${heatmapLegend()}
+  </div>`;
+}
+
+function heatmapHTML(days){
+  if(!days.length) return '<div class="muted">Sin días que mostrar.</div>';
+  const metric = state.metric;
+  const maxDays = 60;
+  const viewDays = days.slice(-maxDays);
+  const byKey = new Map();
+  visibleEntries().forEach(e=>byKey.set(e.playerId+'|'+e.date, e));
+  const months = [];
+  viewDays.forEach(d=>{
+    const m = parseISO(d).getMonth();
+    if(!months.length || months[months.length-1].m!==m) months.push({m, span:0});
+    months[months.length-1].span++;
+  });
+  const today = todayISO();
+  let h = `<div class="hm" style="grid-template-columns:148px repeat(${viewDays.length},27px)">`;
+  h += `<div class="hm-name hm-corner">Jugadora</div>`;
+  months.forEach(seg=>{ h += `<div class="hm-month" style="grid-column:span ${seg.span}">${MONTHS[seg.m]}</div>`; });
+  h += `<div class="hm-name" style="visibility:hidden"></div>`;
+  viewDays.forEach(d=>{
+    const dt = parseISO(d);
+    h += `<div class="hm-date ${d===today?'is-today':''}" data-tip="${esc(fmtDay(d))}"><b>${dt.getDate()}</b><span>${WD[dt.getDay()]}</span></div>`;
+  });
+  state.players.forEach(p=>{
+    h += `<div class="hm-name" title="${esc(p.name)}">${esc(p.name)}</div>`;
+    viewDays.forEach(d=>{
+      const e = byKey.get(p.id+'|'+d);
+      const todayCls = d===today ? ' is-today' : '';
+      if(!e){
+        h += `<div class="hm-cell is-empty${todayCls}" data-tip="${esc(p.name)} · ${esc(fmtDay(d))}&#10;Sin respuesta"></div>`;
+        return;
+      }
+      let bg = 'rgba(255,255,255,.05)', content = '', tip = `${p.name} · ${fmtDay(d)}`;
+      if(metric==='fatiga'){
+        if(e.fatigue!=null){ const rgb = fatigueRgb(e.fatigue); bg = rgbaStr(rgb,.42); content = String(e.fatigue); tip += `\nFatiga ${e.fatigue}/10`; }
+        else tip += '\nFatiga sin dato';
+      }else if(metric==='sueno'){
+        if(e.sleep!=null){ const rgb = sleepRgb(e.sleep); bg = rgbaStr(rgb,.42); content = String(e.sleep); tip += `\nSueño ${e.sleep}/5 (${sleepLabel(e.sleep)})`; }
+        else tip += '\nSueño sin dato';
+      }else if(metric==='molestias'){
+        if(e.discomfort===1){ bg = 'rgba(255,74,61,.5)'; content = '<i class="dot"></i>'; tip += `\nMolestia: ${e.discomfortNote||'sí'}`; }
+        else tip += '\nSin molestia';
+      }else if(metric==='regla'){
+        if(e.period===1){ bg = 'rgba(167,139,250,.5)'; content = '<i class="dot"></i>'; tip += '\nCon la regla'; }
+        else tip += '\nSin regla';
+      }
+      h += `<div class="hm-cell${todayCls}" style="background:${bg}" data-tip="${esc(tip).replace(/\n/g,'&#10;')}" data-action="open-player" data-player="${esc(p.id)}">${content}</div>`;
+    });
+  });
+  h += '</div>';
+  if(days.length > maxDays) h += `<div class="scale" style="margin-top:6px"><span>Mostrando los últimos ${maxDays} días de ${days.length}. Cambia el periodo para acercar.</span></div>`;
+  return h;
+}
+
+function heatmapLegend(){
+  const m = state.metric;
+  const dot = (color,label) => `<span><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${color};margin-right:5px"></i>${label}</span>`;
+  const box = (bg,label,extra='') => `<span><i style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${bg};margin-right:5px;${extra}"></i>${label}</span>`;
+  if(m==='fatiga') return `<div class="scale"><span>1 fresca</span><span class="bar fatigue"></span><span>10 agotada</span>${box('rgba(255,255,255,.06)','Sin respuesta')}</div>`;
+  if(m==='sueno') return `<div class="scale"><span>1 muy mala</span><span class="bar sleep"></span><span>5 muy buena</span>${box('rgba(255,255,255,.06)','Sin respuesta')}</div>`;
+  if(m==='molestias') return `<div class="scale">${dot('rgba(255,74,61,.9)','Con molestia')}${box('rgba(255,255,255,.09)','Sin molestia')}${box('rgba(255,255,255,.03)','Sin respuesta','border:1px dashed rgba(255,255,255,.16)')}</div>`;
+  return `<div class="scale">${dot('rgba(167,139,250,.9)','Con la regla')}${box('rgba(255,255,255,.09)','Sin regla')}${box('rgba(255,255,255,.03)','Sin respuesta','border:1px dashed rgba(255,255,255,.16)')}</div>`;
+}
+
+function resumenCard(st){
+  const rows = state.players.map(p=>{
+    const list = p.entries.filter(e=>e.date>=st.start && e.date<=st.end);
+    const last = p.entries[p.entries.length-1];
+    return {
+      p, n:list.length,
+      fatigue:mean(list.map(e=>e.fatigue)),
+      sleep:mean(list.map(e=>e.sleep)),
+      dis:list.filter(e=>e.discomfort===1).length,
+      per:list.filter(e=>e.period===1).length,
+      last
+    };
+  }).sort((a,b)=> b.n-a.n || a.p.name.localeCompare(b.p.name,'es'));
+  const body = rows.map(r=>`<tr class="clickable" data-action="open-player" data-player="${esc(r.p.id)}">
+      <td><div class="name-cell"><span class="avatar">${esc(initials(r.p.name))}</span><span>${esc(r.p.name)}</span></div></td>
+      <td class="num">${r.n}</td>
+      <td>${r.fatigue!=null?pillFatigue(Math.round(r.fatigue))+` <span class="muted num">${num1(r.fatigue)}</span>`:'<span class="muted">—</span>'}</td>
+      <td>${r.sleep!=null?pillSleep(Math.round(r.sleep))+` <span class="muted num">${num1(r.sleep)}</span>`:'<span class="muted">—</span>'}</td>
+      <td class="num">${r.dis?`<span class="tag tag-yes">${r.dis}</span>`:'<span class="muted">0</span>'}</td>
+      <td class="num">${r.per?`<span class="tag tag-period">${r.per}</span>`:'<span class="muted">0</span>'}</td>
+      <td class="muted">${fmtDay(r.last.date)}</td>
+      <td>${sparklineSVG(r.p)}</td>
+    </tr>`).join('');
+  return `<div class="card">
+    <div class="card-head"><div><h3>Resumen por jugadora</h3><div class="hint">Periodo seleccionado · pulsa una fila para ver su ficha</div></div></div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Jugadora</th><th>Resp.</th><th>Fatiga media</th><th>Sueño medio</th><th>Molestias</th><th>Días regla</th><th>Última</th><th>Evolución</th></tr></thead>
+      <tbody>${body}</tbody>
+    </table></div>
+  </div>`;
+}
+
+/* =========================================================================
+   Vista · Jugadoras
+   ========================================================================= */
+function renderJugadoras(){
+  if(!state.players.length) return renderEmpty();
+  const st = rangeStats();
+  if(!st) return renderEmpty();
+  let selected = state.players.find(p=>p.id===state.selectedPlayer);
+  if(!selected){ selected = state.players[0]; state.selectedPlayer = selected.id; }
+  const q = norm(state.playerQuery);
+  const listHTML = state.players
+    .filter(p=> !q || norm(p.name).includes(q))
+    .map(p=>{
+      const list = p.entries.filter(e=>e.date>=st.start && e.date<=st.end);
+      const fat = mean(list.map(e=>e.fatigue));
+      return `<button type="button" class="player-item ${p.id===selected.id?'is-active':''}" data-action="select-player" data-player="${esc(p.id)}" data-name="${esc(norm(p.name))}">
+        <span class="avatar">${esc(initials(p.name))}</span>
+        <span style="min-width:0"><span class="pn" style="display:block">${esc(p.name)}</span><span class="ps" style="display:block">fatiga ${num1(fat)} · ${list.length} resp.</span></span>
+        ${sparklineSVG(p)}
+      </button>`;
+    }).join('');
+  return `<div class="page">
+    <div class="page-head">
+      <div><div class="eyebrow">Jugadoras</div><h1>Global por jugadora</h1><p>Evolución individual, molestias y ciclo. Elige una jugadora en la lista.</p></div>
+      ${rangeSeg()}
+    </div>
+    <div class="jugadoras-layout">
+      <div class="card player-list-card">
+        <div class="player-search">${searchIcon()}<input class="input" id="playerSearch" type="search" placeholder="Buscar jugadora…" autocomplete="off" value="${esc(state.playerQuery)}"></div>
+        <div class="player-list" id="playerList">${listHTML || '<div class="muted" style="padding:10px;font-size:11px">Sin resultados.</div>'}</div>
+      </div>
+      <div class="detail" id="playerDetail">${playerDetailHTML(selected, st)}</div>
+    </div>
+  </div>`;
+}
+
+function playerDetailHTML(p, st){
+  const list = p.entries.filter(e=>e.date>=st.start && e.date<=st.end);
+  const fatigue = mean(list.map(e=>e.fatigue));
+  const sleep = mean(list.map(e=>e.sleep));
+  const dis = list.filter(e=>e.discomfort===1);
+  const perDays = list.filter(e=>e.period===1).length;
+  const trend = fatigueTrend(p);
+  const cycle = cycleInfo(p);
+  const last = p.entries[p.entries.length-1];
+  const events = p.entries.filter(e=>e.discomfort===1).slice(-6).reverse();
+  return `<div class="card mb-14">
+      <div class="detail-head">
+        <span class="avatar lg">${esc(initials(p.name))}</span>
+        <div>
+          <h2>${esc(p.name)}</h2>
+          <div class="sub">${list.length} respuestas en el periodo · última: ${last?fmtDay(last.date,{wd:false}):'—'}</div>
+        </div>
+      </div>
+      <div class="mini-kpis">
+        ${miniKpi('Respuestas', String(list.length), 'en el periodo')}
+        ${miniKpi('Fatiga media', `${num1(fatigue)}<small>/10</small>`, trend!=null?deltaPill(trend,'down')+' vs 7 d':'sin comparación')}
+        ${miniKpi('Sueño medio', `${num1(sleep)}<small>/5</small>`, 'calidad percibida')}
+        ${miniKpi('Molestias', String(dis.length), dis.length?'registradas':'ninguna')}
+        ${miniKpi('Días de regla', String(perDays), 'en el periodo')}
+      </div>
+    </div>
+    <div class="card mb-14">
+      <div class="card-head">
+        <div><h3>Fatiga diaria</h3><div class="hint">Zonas: verde 1–4 · amarillo 5–6 · naranja 7–8 · rojo 9–10</div></div>
+        <div class="side"><label class="check"><input type="checkbox" data-action="compare-team" ${state.compareTeam?'checked':''}> Media del equipo</label></div>
+      </div>
+      <div class="chart" data-chart="player-fatigue"></div>
+      <div class="legend">
+        <span><i style="background:#ff7a1a"></i>Fatiga</span>
+        <span><i style="background:rgba(167,139,250,.55)"></i>Día de regla</span>
+        <span><i style="background:transparent;border:1.5px solid #ff4a3d;border-radius:50%"></i>Molestia</span>
+        ${state.compareTeam?'<span><span class="dash"></span>Media del equipo</span>':''}
+      </div>
+    </div>
+    <div class="grid-2 mb-14">
+      <div class="card">
+        <div class="card-head"><div><h3>Calidad del sueño</h3><div class="hint">1 = muy mala · 5 = muy buena · umbral ${state.thresholds.sleepLow}</div></div></div>
+        <div class="chart" data-chart="player-sleep"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><h3>Molestias</h3><div class="hint">Últimos registros · ${dis.length} en el periodo</div></div></div>
+        ${events.length ? `<ul class="event-list">${events.map(e=>`<li><span class="date">${fmtDay(e.date)}</span><span class="txt">${esc(e.discomfortNote||'Molestia sin detalle')}</span></li>`).join('')}</ul>`
+          : '<div class="muted" style="font-size:11px;padding:8px 0">Sin molestias registradas.</div>'}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><h3>Ciclo y regla</h3><div class="hint">Estimación orientativa a partir de los «sí» del formulario</div></div></div>
+      ${cycle.eps.length ? `
+        <div class="cycle-stats">
+          <div class="cycle-stat"><div class="label">Último inicio</div><div class="value">${fmtDay(cycle.last.start,{wd:false})}</div></div>
+          <div class="cycle-stat"><div class="label">Ciclo medio</div><div class="value">${cycle.avg!=null?num1(cycle.avg)+' <small>días</small>':'<small>sin historial</small>'}</div></div>
+          <div class="cycle-stat"><div class="label">Próximo inicio aprox.</div><div class="value">${cycle.next?fmtDay(cycle.next,{wd:false}):'—'}</div></div>
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Inicio</th><th>Duración</th></tr></thead>
+          <tbody>${cycle.eps.slice(-4).reverse().map(ep=>`<tr><td>${fmtDay(ep.start,{wd:false,yr:true})}</td><td>${ep.days} día${ep.days===1?'':'s'}</td></tr>`).join('')}</tbody>
+        </table></div>
+        <p class="nota">${perDays} día${perDays===1?'':'s'} de regla en el periodo seleccionado.${cycle.avg==null?' Con un solo ciclo registrado, el próximo inicio se estima usando 28 días como referencia.':''} La predicción es aproximada y no sustituye a lo que indique la jugadora.</p>`
+      : '<div class="muted" style="font-size:11px;padding:8px 0">Todavía no hay registros de regla para esta jugadora.</div>'}
+    </div>`;
+}
+
+function sparklineSVG(p, w=58, h=20){
+  const vals = p.entries.slice(-18).filter(e=>e.fatigue!=null);
+  if(vals.length < 2) return '<span class="spark muted">—</span>';
+  const padPx = 2;
+  const pts = vals.map((e,i)=>{
+    const x = padPx + (i*(w-2*padPx))/(vals.length-1);
+    const y = padPx + (1-((e.fatigue-1)/9))*(h-2*padPx);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const last = vals[vals.length-1].fatigue;
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline points="${pts.join(' ')}" fill="none" stroke="${fatigueColor(last)}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+/* =========================================================================
+   Gráficas SVG
+   ========================================================================= */
+function currentPlayer(){
+  return state.players.find(p=>p.id===state.selectedPlayer) || state.players[0] || null;
+}
+function mountCharts(){
+  $$('[data-chart]').forEach(host=>{
+    const kind = host.dataset.chart;
+    const w = Math.max(300, Math.floor(host.clientWidth || 620));
+    let svg = '';
+    try{
+      if(kind==='team-fatigue') svg = teamChartSVG(w,'fatigue');
+      else if(kind==='team-sleep') svg = teamChartSVG(w,'sleep');
+      else if(kind==='player-fatigue'){ const p = currentPlayer(); if(p) svg = playerFatigueSVG(w,p); }
+      else if(kind==='player-sleep'){ const p = currentPlayer(); if(p) svg = playerSleepSVG(w,p); }
+    }catch(err){ console.error(err); svg=''; }
+    host.innerHTML = svg || '<div class="chart-empty">Sin datos suficientes para esta gráfica.</div>';
+  });
+}
+function teamChartSVG(width, metric){
+  const days = getRangeDays();
+  const daily = dailyTeam(days);
+  const values = daily.map(d=> metric==='fatigue' ? d.fatigue : d.sleep);
+  if(!values.some(v=>v!=null)) return '';
+  const H = 236, padL = 34, padR = 14, padT = 18, padB = 30;
+  const W = Math.max(320, width);
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const yMax = metric==='fatigue' ? 10 : 5, yMin = 1;
+  const n = days.length;
+  const step = n>1 ? plotW/(n-1) : plotW;
+  const x = i => padL + (n>1 ? i*step : plotW/2);
+  const y = v => padT + (1-((v-yMin)/(yMax-yMin)))*plotH;
+  const rgb = metric==='fatigue' ? ACCENT_RGB : BLUE_RGB;
+  const color = rgbStr(rgb);
+  const ticks = metric==='fatigue' ? [2,4,6,8,10] : [1,2,3,4,5];
+  const threshold = metric==='fatigue' ? state.thresholds.fatigueHigh : state.thresholds.sleepLow;
+  const gradId = 'grad-'+metric;
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${metric==='fatigue'?'Fatiga media del equipo':'Calidad del sueño del equipo'}">`;
+  s += `<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${rgbaStr(rgb,.32)}"/><stop offset="1" stop-color="${rgbaStr(rgb,0)}"/></linearGradient></defs>`;
+  ticks.forEach(t=>{
+    const yy = y(t);
+    s += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.055)" stroke-width="1"/>`;
+    s += `<text x="${padL-7}" y="${(yy+3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#71839b">${t}</text>`;
+  });
+  if(threshold>yMin && threshold<yMax){
+    const ty = y(threshold);
+    s += `<line x1="${padL}" y1="${ty.toFixed(1)}" x2="${W-padR}" y2="${ty.toFixed(1)}" stroke="${rgbaStr(rgb,.5)}" stroke-width="1" stroke-dasharray="4 4"/>`;
+    s += `<text x="${W-padR}" y="${(ty-5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9aaac1">umbral ${threshold}</text>`;
+  }
+  const labelSet = new Set(xLabelIndices(n,7));
+  days.forEach((d,i)=>{
+    if(!labelSet.has(i)) return;
+    const anchor = i===0 ? 'start' : (i===n-1 ? 'end' : 'middle');
+    s += `<text x="${x(i).toFixed(1)}" y="${H-10}" text-anchor="${anchor}" font-size="9" fill="#71839b">${fmtDay(d)}</text>`;
+  });
+  const pts = [];
+  values.forEach((v,i)=>{ if(v!=null) pts.push([x(i), y(v), i]); });
+  if(pts.length){
+    const base = y(yMin);
+    const line = pts.map(([px,py])=>`${px.toFixed(1)},${py.toFixed(1)}`).join(' ');
+    const area = `M ${pts[0][0].toFixed(1)} ${base.toFixed(1)} L ` + pts.map(([px,py])=>`${px.toFixed(1)} ${py.toFixed(1)}`).join(' L ') + ` L ${pts[pts.length-1][0].toFixed(1)} ${base.toFixed(1)} Z`;
+    s += `<path d="${area}" fill="url(#${gradId})"/>`;
+    s += `<polyline points="${line}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach(([px,py])=>{ s += `<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="2.8" fill="#0b1421" stroke="${color}" stroke-width="1.8"/>`; });
+  }
+  const colW = n>1 ? step : plotW;
+  daily.forEach((d,i)=>{
+    if(!d.n) return;
+    const left = Math.max(padL, n>1 ? x(i)-step/2 : padL);
+    const widthRect = Math.max(6, Math.min(colW, W-padR-left));
+    const tip = `${fmtDay(d.date)}\n${metric==='fatigue'?'Fatiga media':'Sueño medio'}: ${num1(metric==='fatigue'?d.fatigue:d.sleep)}${d.n?'/'+(metric==='fatigue'?10:5):''}\n${d.n} respuestas`;
+    s += `<rect x="${left.toFixed(1)}" y="${padT}" width="${widthRect.toFixed(1)}" height="${plotH}" fill="transparent" data-tip="${esc(tip).replace(/\n/g,'&#10;')}"/>`;
+  });
+  s += '</svg>';
+  return s;
+}
+function playerFatigueSVG(width, p){
+  const days = getRangeDays();
+  if(!days.length) return '';
+  const H = 250, padL = 34, padR = 14, padT = 16, padB = 30;
+  const W = Math.max(320, width);
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const n = days.length;
+  const step = n>1 ? plotW/(n-1) : plotW;
+  const x = i => padL + (n>1 ? i*step : plotW/2);
+  const y = v => padT + (1-((v-1)/9))*plotH;
+  const byDate = new Map(p.entries.map(e=>[e.date,e]));
+  const team = dailyTeam(days);
+  const teamByDate = new Map(team.map(d=>[d.date,d]));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Fatiga de ${esc(p.name)}">`;
+  const zones = [[10,8,'rgba(255,74,61,.075)'],[8,6,'rgba(255,122,26,.075)'],[6,4,'rgba(255,197,61,.055)'],[4,1,'rgba(47,208,122,.06)']];
+  zones.forEach(([a,b,fill])=>{
+    const y1 = y(a), y2 = y(b);
+    s += `<rect x="${padL}" y="${y1.toFixed(1)}" width="${plotW.toFixed(1)}" height="${(y2-y1).toFixed(1)}" fill="${fill}"/>`;
+  });
+  [2,4,6,8,10].forEach(t=>{
+    const yy = y(t);
+    s += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.055)"/>`;
+    s += `<text x="${padL-7}" y="${(yy+3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#71839b">${t}</text>`;
+  });
+  const labelSet = new Set(xLabelIndices(n,8));
+  days.forEach((d,i)=>{
+    if(!labelSet.has(i)) return;
+    const anchor = i===0 ? 'start' : (i===n-1 ? 'end' : 'middle');
+    s += `<text x="${x(i).toFixed(1)}" y="${H-10}" text-anchor="${anchor}" font-size="9" fill="#71839b">${fmtDay(d)}</text>`;
+  });
+  const bandW = Math.max(6, Math.min(step*0.62, 16));
+  days.forEach((d,i)=>{
+    const e = byDate.get(d);
+    if(e && e.period===1){
+      const cx = x(i);
+      s += `<rect x="${(cx-bandW/2).toFixed(1)}" y="${padT}" width="${bandW.toFixed(1)}" height="${plotH}" fill="rgba(167,139,250,.15)"/>`;
+    }
+  });
+  const ty = y(7);
+  s += `<line x1="${padL}" y1="${ty.toFixed(1)}" x2="${W-padR}" y2="${ty.toFixed(1)}" stroke="rgba(255,122,26,.45)" stroke-dasharray="4 4"/>`;
+  s += `<text x="${W-padR}" y="${(ty-5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9aaac1">umbral 7</text>`;
+  if(state.compareTeam){
+    const teamPts = [];
+    days.forEach((d,i)=>{ const t = teamByDate.get(d); if(t && t.fatigue!=null) teamPts.push([x(i), y(t.fatigue)]); });
+    if(teamPts.length>1){
+      s += `<polyline points="${teamPts.map(([a,b])=>`${a.toFixed(1)},${b.toFixed(1)}`).join(' ')}" fill="none" stroke="rgba(154,170,193,.42)" stroke-width="1.3" stroke-dasharray="3 4"/>`;
+    }
+  }
+  const pts = [];
+  days.forEach((d,i)=>{ const e = byDate.get(d); if(e && e.fatigue!=null) pts.push([x(i), y(e.fatigue), e]); });
+  if(pts.length){
+    s += `<defs><linearGradient id="pfgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,122,26,.30)"/><stop offset="1" stop-color="rgba(255,122,26,0)"/></linearGradient></defs>`;
+    const base = y(1);
+    const area = `M ${pts[0][0].toFixed(1)} ${base.toFixed(1)} L ` + pts.map(([a,b])=>`${a.toFixed(1)} ${b.toFixed(1)}`).join(' L ') + ` L ${pts[pts.length-1][0].toFixed(1)} ${base.toFixed(1)} Z`;
+    s += `<path d="${area}" fill="url(#pfgrad)"/>`;
+    s += `<polyline points="${pts.map(([a,b])=>`${a.toFixed(1)},${b.toFixed(1)}`).join(' ')}" fill="none" stroke="#ff7a1a" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    pts.forEach(([a,b,e])=>{
+      const rgb = fatigueRgb(e.fatigue);
+      s += `<circle cx="${a.toFixed(1)}" cy="${b.toFixed(1)}" r="3.1" fill="#0b1421" stroke="${rgbStr(rgb)}" stroke-width="1.9"/>`;
+      if(e.discomfort===1) s += `<circle cx="${a.toFixed(1)}" cy="${b.toFixed(1)}" r="6.4" fill="none" stroke="rgba(255,74,61,.85)" stroke-width="1.2"/>`;
+    });
+  }
+  days.forEach((d,i)=>{
+    const e = byDate.get(d);
+    if(!e) return;
+    const t = teamByDate.get(d);
+    let tip = `${fmtDay(d)}\nFatiga: ${e.fatigue!=null?e.fatigue+'/10':'—'} · Sueño: ${e.sleep!=null?e.sleep+'/5':'—'}`;
+    if(t && t.fatigue!=null && state.compareTeam) tip += `\nMedia del equipo: ${num1(t.fatigue)}/10`;
+    if(e.discomfort===1) tip += `\nMolestia: ${e.discomfortNote||'sí'}`;
+    if(e.period===1) tip += '\nRegla: sí';
+    const left = Math.max(padL, n>1 ? x(i)-step/2 : padL);
+    const widthRect = Math.max(8, Math.min(n>1?step:plotW, W-padR-left));
+    s += `<rect x="${left.toFixed(1)}" y="${padT}" width="${widthRect.toFixed(1)}" height="${plotH}" fill="transparent" data-tip="${esc(tip).replace(/\n/g,'&#10;')}"/>`;
+  });
+  s += '</svg>';
+  return s;
+}
+function playerSleepSVG(width, p){
+  const days = getRangeDays();
+  if(!days.length) return '';
+  const H = 200, padL = 34, padR = 14, padT = 16, padB = 30;
+  const W = Math.max(320, width);
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const n = days.length;
+  const step = n>1 ? plotW/(n-1) : plotW;
+  const x = i => padL + (n>1 ? i*step : plotW/2);
+  const y = v => padT + (1-((v-1)/4))*plotH;
+  const byDate = new Map(p.entries.map(e=>[e.date,e]));
+  let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Calidad del sueño de ${esc(p.name)}">`;
+  [1,2,3,4,5].forEach(t=>{
+    const yy = y(t);
+    s += `<line x1="${padL}" y1="${yy.toFixed(1)}" x2="${W-padR}" y2="${yy.toFixed(1)}" stroke="rgba(255,255,255,.055)"/>`;
+    s += `<text x="${padL-7}" y="${(yy+3.5).toFixed(1)}" text-anchor="end" font-size="9" fill="#71839b">${t}</text>`;
+  });
+  const labelSet = new Set(xLabelIndices(n,8));
+  days.forEach((d,i)=>{
+    if(!labelSet.has(i)) return;
+    const anchor = i===0 ? 'start' : (i===n-1 ? 'end' : 'middle');
+    s += `<text x="${x(i).toFixed(1)}" y="${H-10}" text-anchor="${anchor}" font-size="9" fill="#71839b">${fmtDay(d)}</text>`;
+  });
+  const ty = y(state.thresholds.sleepLow);
+  s += `<line x1="${padL}" y1="${ty.toFixed(1)}" x2="${W-padR}" y2="${ty.toFixed(1)}" stroke="rgba(110,168,254,.45)" stroke-dasharray="4 4"/>`;
+  s += `<text x="${W-padR}" y="${(ty-5).toFixed(1)}" text-anchor="end" font-size="8.5" fill="#9aaac1">umbral ${state.thresholds.sleepLow}</text>`;
+  const barW = Math.max(5, Math.min(step*0.55, 20));
+  days.forEach((d,i)=>{
+    const e = byDate.get(d);
+    if(!e || e.sleep==null) return;
+    const cx = x(i);
+    const top = y(e.sleep);
+    const bottom = y(1);
+    const rgb = sleepRgb(e.sleep);
+    s += `<rect x="${(cx-barW/2).toFixed(1)}" y="${top.toFixed(1)}" width="${barW.toFixed(1)}" height="${(bottom-top).toFixed(1)}" rx="3" fill="${rgbaStr(rgb,.72)}"/>`;
+  });
+  days.forEach((d,i)=>{
+    const e = byDate.get(d);
+    if(!e) return;
+    const tip = `${fmtDay(d)}\nSueño: ${e.sleep!=null?e.sleep+'/5 ( '+sleepLabel(e.sleep)+' )':'sin dato'}`;
+    const left = Math.max(padL, n>1 ? x(i)-step/2 : padL);
+    const widthRect = Math.max(8, Math.min(n>1?step:plotW, W-padR-left));
+    s += `<rect x="${left.toFixed(1)}" y="${padT}" width="${widthRect.toFixed(1)}" height="${plotH}" fill="transparent" data-tip="${esc(tip).replace(/\n/g,'&#10;')}"/>`;
+  });
+  s += '</svg>';
+  return s;
+}
+
+/* =========================================================================
+   Vista · Datos y conexión
+   ========================================================================= */
+const CODE_GS = `/**
+ * Wellness · Huddle7 — fuente de datos para el panel
+ *
+ * 1. Abre la hoja de respuestas del formulario.
+ * 2. Extensiones > Apps Script. Borra lo que haya y pega este código.
+ * 3. Guarda y implementa: Implementar > Nueva implementación > Aplicación web.
+ *    - Ejecutar como: Yo
+ *    - Quién tiene acceso: Cualquier persona
+ * 4. Copia la URL que termina en /exec y pégala en el panel.
+ *
+ * La URL es privada: quien la tenga puede leer las respuestas.
+ */
+function doGet(e) {
+  var libro = SpreadsheetApp.getActiveSpreadsheet();
+  var nombre = (e && e.parameter && e.parameter.sheet) || '';
+  var hoja = nombre ? libro.getSheetByName(nombre) : libro.getSheets()[0];
+  if (!hoja) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ ok: false, error: 'Hoja no encontrada' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  var valores = hoja.getDataRange().getDisplayValues();
+  var payload = JSON.stringify({
+    ok: true,
+    updatedAt: new Date().toISOString(),
+    values: valores
+  });
+  var cb = e && e.parameter && e.parameter.callback;
+  if (cb) {
+    return ContentService
+      .createTextOutput(cb + '(' + payload + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(payload)
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+function renderDatos(){
+  const formSource = state.formSource || (state.source==='sheet' ? 'sheet' : state.source==='file' ? 'csv' : 'demo');
+  return `<div class="page">
+    <div class="page-head">
+      <div><div class="eyebrow">Configuración</div><h1>Datos y conexión</h1><p>Conecta el formulario, revisa cómo se leen las columnas y ajusta los avisos.</p></div>
+    </div>
+    <div class="card mb-14">
+      <div class="card-head">
+        <div><h3>Fuente de datos</h3><div class="hint">La actualización automática funciona mientras el panel esté abierto.</div></div>
+        <div class="side"><span class="chip ${state.source==='demo'?'is-demo':state.source==='sheet'?'is-live':'is-file'}"><i class="dot"></i>En uso: ${esc(state.source==='demo'?'datos de ejemplo':state.source==='sheet'?'Google Sheets':state.sourceLabel||'CSV')}</span></div>
+      </div>
+      ${sourceOptionsHTML(formSource)}
+      ${sourcePanelHTML(formSource)}
+    </div>
+    ${shareCardHTML()}
+    ${state.raw ? mappingCardHTML() : ''}
+    <div class="grid-2 mt-14">
+      ${thresholdsCardHTML()}
+      ${configCardHTML()}
+    </div>
+    <div class="mt-14">${privacyCardHTML()}</div>
+  </div>`;
+}
+function sourceOptionsHTML(current){
+  const opts = [
+    {key:'demo', title:'Datos de ejemplo', desc:'Equipo ficticio de 5 semanas para probar el panel sin configurar nada.'},
+    {key:'sheet', title:'Google Sheets', desc:'Se actualiza solo. Recomendado si usas Google Forms para el wellness.'},
+    {key:'csv', title:'Archivo CSV', desc:'Importación manual del CSV exportado desde la hoja de respuestas.'}
+  ];
+  const icon = {
+    demo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 5h16v14H4z"/><path d="M9 3v4M15 3v4"/></svg>',
+    sheet:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></svg>',
+    csv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v6h5"/></svg>'
+  };
+  return `<div class="source-options">${opts.map(o=>`
+    <button type="button" class="source-option ${current===o.key?'is-active':''}" data-action="source-option" data-source="${o.key}">
+      <span class="t">${icon[o.key]}${o.title}</span>
+      <span class="d">${o.desc}</span>
+    </button>`).join('')}</div>`;
+}
+function sourcePanelHTML(kind){
+  if(kind==='demo'){
+    return `<div class="source-panel">
+      <p class="form-note">Los datos de ejemplo se generan en tu navegador y no se envía nada a ningún servidor. Son <b>13 jugadoras durante 5 semanas</b> con casos realistas: fatiga alta, molestias recurrentes, mala racha de sueño y días de regla.</p>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button type="button" class="btn btn-primary" data-action="load-demo">Usar datos de ejemplo</button>
+      </div>
+    </div>`;
+  }
+  if(kind==='sheet'){
+    return `<div class="source-panel">
+      <div class="row">
+        <input class="input" id="sheetUrl" type="url" spellcheck="false" placeholder="Pega aquí la URL de Apps Script (…/exec) o una URL CSV publicada" value="${esc(state.sourceUrl)}">
+        <button type="button" class="btn btn-primary" data-action="connect-sheet">Conectar</button>
+      </div>
+      <div class="status-line">${state.connectionMsg ? esc(state.connectionMsg) : (state.source==='sheet' ? 'Conectado a Google Sheets.' : 'Sin conexión configurada.')}</div>
+      <div class="row" style="margin-top:6px">
+        <label class="check">Actualizar
+          <select class="select" data-action="refresh-interval">
+            ${[[0,'Manual'],[60,'Cada minuto'],[300,'Cada 5 minutos'],[900,'Cada 15 minutos'],[1800,'Cada 30 minutos']].map(([v,l])=>`<option value="${v}" ${Number(state.autoRefreshSec)===v?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </label>
+      </div>
+      <details class="help">
+        <summary>Cómo conectar tu Google Sheet (2 minutos, gratis)</summary>
+        <div class="help-body">
+          <ol>
+            <li>Abre la hoja de respuestas del formulario (<b>Respuestas → Ver en Hojas de cálculo</b> si aún no la tienes).</li>
+            <li>En la hoja: <b>Extensiones → Apps Script</b>. Borra el contenido y pega el script de abajo.</li>
+            <li>Guarda y pulsa <b>Implementar → Nueva implementación → Aplicación web</b>.</li>
+            <li>Ejecutar como: <b>Yo</b>. Quién tiene acceso: <b>Cualquier persona</b>. Autoriza e implementa.</li>
+            <li>Copia la URL que termina en <b>/exec</b>, pégala arriba y pulsa <b>Conectar</b>.</li>
+          </ol>
+          <p class="form-note" style="margin-top:0">La URL es privada: cualquiera que la tenga puede leer las respuestas. No la compartas. También puedes pegar una URL CSV publicada (<b>Archivo → Compartir → Publicar en la web → CSV</b>), pero algunos navegadores la bloquean por CORS al abrir el panel como archivo local.</p>
+          <pre class="code">${esc(CODE_GS)}</pre>
+          <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+            <button type="button" class="btn btn-sm" data-action="copy-gs">Copiar script</button>
+          </div>
+        </div>
+      </details>
+    </div>`;
+  }
+  return `<div class="source-panel">
+    <label class="dropzone" id="dropzone">
+      Arrastra aquí el CSV o haz clic para elegirlo
+      <input type="file" id="csvFile" accept=".csv,text/csv,.txt" hidden>
+      <div class="form-note" style="margin-top:6px">La primera fila debe llevar los encabezados. Se aceptan <b>,</b> y <b>;</b> como separadores, y fechas tipo <b>26/11/2026</b> o <b>2026-11-26</b>.</div>
+    </label>
+    <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <button type="button" class="btn" data-action="load-sample">Cargar CSV de ejemplo</button>
+    </div>
+  </div>`;
+}
+function fieldOptionsHTML(selected){
+  return `<option value="">Ignorar</option>` + FIELD_KEYS.map(k=>`<option value="${k}" ${selected===k?'selected':''}>${FIELD_LABELS[k]}</option>`).join('');
+}
+function previewRowHTML(row, mapping){
+  const idx = f => mapping.indexOf(f);
+  const val = f => { const i = idx(f); return i>=0 ? row[i] : ''; };
+  const name = titleName(String(val('player')==null?'':val('player')).trim());
+  const dt = parseDateCell(val('timestamp'));
+  const fat = parseScore(val('fatigue'),1,10);
+  const slp = parseSleep(val('sleep'));
+  const dis = parseYesNo(val('discomfort'));
+  const per = parseYesNo(val('period'));
+  const parts = [`<b>${esc(name||'—')}</b>`];
+  if(dt) parts.push(fmtDay(dt.date,{wd:false,yr:true}));
+  if(fat!=null) parts.push(`fatiga ${fat}/10`);
+  if(slp!=null) parts.push(`sueño ${slp}/5`);
+  if(dis!=null) parts.push(`molestia: ${dis?'sí':'no'}`);
+  if(per!=null) parts.push(`regla: ${per?'sí':'no'}`);
+  return `<div>${parts.join(' · ')}</div>`;
+}
+function mappingCardHTML(){
+  const {headers, rows} = state.raw;
+  const needs = !requireColumns(state.mapping);
+  const info = state.importInfo;
+  const mapRows = headers.map((h,i)=>`<tr>
+      <td>${esc(h||'(sin título)')}</td>
+      <td><select class="select" data-action="map-field" data-index="${i}">${fieldOptionsHTML(state.mapping[i])}</select></td>
+      <td class="example" title="${esc(String(rows[0]&&rows[0][i]!=null?rows[0][i]:''))}">${esc(String(rows[0]&&rows[0][i]!=null?rows[0][i]:''))}</td>
+    </tr>`).join('');
+  const preview = rows.slice(0,3).map(r=>previewRowHTML(r, state.mapping)).join('');
+  const infoBlock = info ? `<div class="import-summary">
+      <div class="item"><b>${info.imported}</b> respuestas</div>
+      <div class="item"><b>${info.players}</b> jugadoras</div>
+      <div class="item"><b>${info.days}</b> días · ${fmtDay(info.from,{wd:false})} – ${fmtDay(info.to,{wd:false})}</div>
+      <div class="item"><b>${info.invalid}</b> filas ignoradas${info.dupes?` · ${info.dupes} duplicadas`:''}</div>
+    </div>` : '';
+  return `<div class="card mb-14">
+    <div class="card-head">
+      <div><h3>Mapeo de columnas</h3><div class="hint">Así se leen las columnas del formulario. El mapeo se guarda para la próxima vez.</div></div>
+      <div class="side">${needs ? '<span class="tag tag-yes">Revisar</span>' : '<span class="tag" style="background:rgba(47,208,122,.14);color:#9ff0c1">Correcto</span>'}</div>
+    </div>
+    ${needs ? '<div class="warn-box" style="margin-bottom:10px">Falta asignar la columna de <b>fecha</b> o la de <b>jugadora</b>. Elige el campo correcto en cada fila.</div>' : ''}
+    <div class="table-wrap"><table class="map-table">
+      <thead><tr><th>Columna del formulario</th><th>Campo del panel</th><th>Primer valor</th></tr></thead>
+      <tbody>${mapRows}</tbody>
+    </table></div>
+    <div class="preview"><div style="font-weight:700;color:var(--text);margin-bottom:4px">Vista previa de las 3 primeras filas</div>${preview || '<div class="muted">Sin filas.</div>'}</div>
+    <div style="display:flex;gap:8px;margin-top:12px;align-items:center;flex-wrap:wrap">
+      <button type="button" class="btn btn-primary" data-action="apply-mapping">Aplicar mapeo y cargar</button>
+      <span class="muted" style="font-size:10.5px">${rows.length} filas leídas</span>
+    </div>
+    ${infoBlock}
+  </div>`;
+}
+function thresholdsCardHTML(){
+  const th = state.thresholds;
+  return `<div class="card">
+    <div class="card-head"><div><h3>Umbrales de aviso</h3><div class="hint">Se usan en el parte del día y en las alertas.</div></div></div>
+    <div class="field-row">
+      <div>Fatiga alta (avisa desde)<div class="desc">Escala 1–10</div></div>
+      <input class="input" type="number" min="5" max="10" step="1" value="${th.fatigueHigh}" data-action="threshold" data-key="fatigueHigh">
+    </div>
+    <div class="field-row">
+      <div>Sueño bajo (avisa hasta)<div class="desc">Escala 1–5</div></div>
+      <input class="input" type="number" min="1" max="4" step="1" value="${th.sleepLow}" data-action="threshold" data-key="sleepLow">
+    </div>
+    <div class="field-row">
+      <div>Incluir molestias en las alertas</div>
+      <label class="check"><input type="checkbox" data-action="threshold-check" data-key="discomfort" ${th.discomfort?'checked':''}></label>
+    </div>
+    <div class="field-row">
+      <div>Incluir regla en las alertas<div class="desc">Normalmente no es una alerta; déjalo desactivado.</div></div>
+      <label class="check"><input type="checkbox" data-action="threshold-check" data-key="period" ${th.period?'checked':''}></label>
+    </div>
+    <div class="field-row">
+      <div>Mostrar media del equipo en la ficha<div class="desc">Línea discontinua en la gráfica de fatiga.</div></div>
+      <label class="check"><input type="checkbox" data-action="compare-team" ${state.compareTeam?'checked':''}></label>
+    </div>
+  </div>`;
+}
+function configCardHTML(){
+  return `<div class="card">
+    <div class="card-head"><div><h3>Equipo y datos</h3><div class="hint">Lo que se guarda en este navegador.</div></div></div>
+    <div class="field-row">
+      <div>Nombre del equipo</div>
+      <input class="input" id="teamNameInput" style="max-width:220px" value="${esc(state.teamName)}" placeholder="${esc(teamLabel())}" data-action="team-name">
+    </div>
+    <div class="field-row"><div>Respuestas en memoria</div><span class="num">${state.entries.length}</span></div>
+    <div class="field-row"><div>Jugadoras detectadas</div><span class="num">${state.players.length}</span></div>
+    <div class="field-row"><div>Fuente actual</div><span class="num">${esc(state.source==='demo'?'Datos de ejemplo':state.source==='sheet'?'Google Sheets':'CSV')}</span></div>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+      <button type="button" class="btn" data-action="export-json">Exportar JSON</button>
+      <button type="button" class="btn" data-action="load-demo">Volver a demo</button>
+      <button type="button" class="btn" data-action="reset-config">Borrar configuración</button>
+    </div>
+  </div>`;
+}
+function shareCardHTML(){
+  const isLocal = location.protocol === 'file:';
+  let body = '';
+  if(isLocal){
+    body = '<p class="form-note">Ahora mismo estás abriendo el panel como archivo local. Para compartirlo con el equipo, abre la versión publicada del panel (la dirección web que te he dado) y genera allí el enlace.</p>';
+  }else if(!state.sourceUrl){
+    body = '<p class="form-note">Conecta primero tu hoja de Google Sheets. Entonces podrás generar un enlace que abra el panel ya con los datos y la actualización automática. Sin fuente, el enlace solo mostraría los datos de ejemplo.</p>';
+  }else{
+    const link = buildShareLink();
+    body = `<div class="row">
+        <input class="input" id="shareLink" readonly value="${esc(link)}" spellcheck="false">
+        <button type="button" class="btn btn-primary" data-action="copy-share">Copiar enlace</button>
+      </div>
+      <p class="form-note">Quien abra este enlace verá el panel conectado a tu hoja, sin configurar nada, y se actualizará cada 5 minutos. <b>El enlace contiene la dirección privada de tu Apps Script</b>: mándalo solo por canales internos del club. Si se filtra, crea otra implementación en Apps Script y genera un enlace nuevo.</p>`;
+  }
+  return `<div class="card mb-14" id="shareCard">
+    <div class="card-head">
+      <div><h3>Compartir con el equipo técnico</h3><div class="hint">Un enlace para que tus compañeros abran el panel con los datos.</div></div>
+      <div class="side">${state.sourceUrl ? '<span class="tag" style="background:rgba(47,208,122,.14);color:#9ff0c1">Listo para compartir</span>' : ''}</div>
+    </div>
+    ${body}
+  </div>`;
+}
+function privacyCardHTML(){
+  return `<div class="card privacy">
+    <div class="card-head"><div><h3>Privacidad y datos sensibles</h3><div class="hint">Fatiga, molestias, sueño y regla son datos de salud.</div></div></div>
+    <p><strong>Todo se queda en tu equipo.</strong> El panel es un archivo local: no hay servidor propio ni base de datos en la nube. Si conectas Google Sheets, las respuestas están en tu cuenta de Google, como hasta ahora.</p>
+    <p><strong>La regla es un dato de categoría especial</strong> según el RGPD. Informa a las jugadoras de qué se recoge, para qué y durante cuánto tiempo; pide su consentimiento y limita el acceso a las personas del cuerpo técnico que lo necesiten. Evita compartir la URL de Apps Script o el CSV fuera del club.</p>
+    <p><strong>Antes de integrarlo en Huddle7</strong> el panel se puede usar como está. La app de escritorio guardará estos datos en local, sin nube, y permitirá exportarlos o borrarlos.</p>
+  </div>`;
+}
+/* =========================================================================
+   Interacción · actualización · inicialización
+   ========================================================================= */
+let autoTimer = null;
+function scheduleAutoRefresh(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer = null; }
+  if(state.source==='sheet' && state.sourceUrl && Number(state.autoRefreshSec)>0){
+    autoTimer = setInterval(()=>{
+      if(document.hidden || state.loading) return;
+      loadSheet(state.sourceUrl, true);
+    }, Number(state.autoRefreshSec)*1000);
+  }
+}
+function goView(v){
+  if(!['equipo','jugadoras','datos'].includes(v)) return;
+  const sameHash = location.hash.slice(1) === v;
+  state.view = v;
+  saveSettings();
+  if(!sameHash && !historySafeReplace(v)) location.hash = v;
+  else render();
+}
+function historySafeReplace(v){
+  try{ history.replaceState(null, '', '#'+v); return true; }catch(e){ return false; }
+}
+function goPlayer(id){
+  state.selectedPlayer = id;
+  state.playerQuery = '';
+  goView('jugadoras');
+}
+function refreshNow(){
+  if(state.source==='sheet' && state.sourceUrl){
+    loadSheet(state.sourceUrl, false);
+  }else if(state.source==='demo'){
+    loadDemo();
+  }else{
+    toast('La fuente actual es un CSV cargado: para actualizarlo, vuelve a importarlo desde Datos.','warn');
+    goView('datos');
+  }
+}
+function connectSheet(){
+  const input = $('#sheetUrl');
+  const url = (input ? input.value : state.sourceUrl || '').trim();
+  if(!url){ toast('Pega la URL de Apps Script de tu hoja de Google.','warn'); return; }
+  state.sourceUrl = url;
+  state.formSource = 'sheet';
+  saveSettings();
+  loadSheet(url, false);
+}
+function exportJSON(){
+  if(!state.entries.length){ toast('No hay datos para exportar.','warn'); return; }
+  const payload = {
+    schema:1,
+    exportedAt:new Date().toISOString(),
+    team:teamLabel(),
+    source:state.source,
+    entries:state.entries
+  };
+  downloadBlob('wellness-'+todayISO()+'.json', JSON.stringify(payload,null,2), 'application/json');
+  toast('Datos exportados en JSON.','ok');
+}
+function resetConfig(){
+  try{ localStorage.removeItem(LS_KEY); localStorage.removeItem(LS_CACHE); }catch(e){}
+  Object.assign(state, defaultState());
+  state.entries = buildDemo();
+  state.players = buildPlayers(state.entries);
+  state.source = 'demo'; state.sourceLabel='Demo';
+  state.day = pickDefaultDay();
+  state.view = 'equipo';
+  state.formSource = null;
+  state.connectionMsg = '';
+  saveSettings();
+  toast('Configuración borrada. Vuelves a los datos de ejemplo.','ok');
+  goView('equipo');
+}
+
+/* ------------------------------- Listeners ------------------------------ */
+document.addEventListener('click', ev=>{
+  const tab = ev.target.closest('.tab');
+  if(tab){ ev.preventDefault(); goView(tab.dataset.view); return; }
+  const el = ev.target.closest('[data-action]');
+  if(!el) return;
+  const action = el.dataset.action;
+  switch(action){
+    case 'refresh': refreshNow(); break;
+    case 'range':{
+      const r = el.dataset.range;
+      state.range = r==='all' ? 'all' : Number(r);
+      saveSettings(); render(); break;
+    }
+    case 'metric': state.metric = el.dataset.metric; saveSettings(); render(); break;
+    case 'select-player':
+    case 'open-player': goPlayer(el.dataset.player); break;
+    case 'day-prev': state.day = addDays(state.day || todayISO(), -1); render(); break;
+    case 'day-next':{
+      const next = addDays(state.day || todayISO(), 1);
+      if(next <= todayISO()){ state.day = next; render(); }
+      break;
+    }
+    case 'day-today': state.day = todayISO(); render(); break;
+    case 'load-demo': loadDemo(); break;
+    case 'goto-datos': goView('datos'); break;
+    case 'source-option': state.formSource = el.dataset.source; render(); break;
+    case 'connect-sheet': connectSheet(); break;
+    case 'copy-gs': copyText(CODE_GS).then(ok=> toast(ok ? 'Script copiado al portapapeles.' : 'No se pudo copiar: selecciona el texto y cópialo a mano.', ok?'ok':'warn')); break;
+    case 'copy-share': {
+      const link = buildShareLink();
+      copyText(link).then(ok=> toast(ok ? 'Enlace para el equipo copiado al portapapeles.' : 'No se pudo copiar: selecciona el enlace y cópialo a mano.', ok?'ok':'warn'));
+      break;
+    }
+    case 'load-sample': loadCSVText(SAMPLE_CSV, 'CSV de ejemplo'); break;
+    case 'apply-mapping': applyMapping({resetView:true}); break;
+    case 'export-json': exportJSON(); break;
+    case 'reset-config': resetConfig(); break;
+    default: break;
+  }
+});
+
+document.addEventListener('change', ev=>{
+  const el = ev.target;
+  if(el.matches('#csvFile')){
+    const file = el.files && el.files[0];
+    el.value = '';
+    if(file) loadCSVFile(file);
+    return;
+  }
+  if(el.matches('select[data-action="map-field"]')){
+    const i = Number(el.dataset.index);
+    state.mapping[i] = el.value || null;
+    render();
+    return;
+  }
+  if(el.matches('select[data-action="refresh-interval"]')){
+    state.autoRefreshSec = Number(el.value);
+    saveSettings(); scheduleAutoRefresh(); render();
+    if(state.autoRefreshSec>0 && state.source!=='sheet') toast('La actualización automática solo está disponible con Google Sheets.','warn');
+    return;
+  }
+  if(el.matches('input[data-action="threshold"]')){
+    const key = el.dataset.key;
+    let v = Number(el.value);
+    if(Number.isNaN(v)) return;
+    v = key==='fatigueHigh' ? clamp(Math.round(v),5,10) : clamp(Math.round(v),1,4);
+    state.thresholds[key] = v;
+    saveSettings(); render();
+    return;
+  }
+  if(el.matches('input[data-action="threshold-check"]')){
+    state.thresholds[el.dataset.key] = !!el.checked;
+    saveSettings(); render();
+    return;
+  }
+  if(el.matches('input[data-action="compare-team"]')){
+    state.compareTeam = !!el.checked;
+    saveSettings(); render();
+    return;
+  }
+  if(el.matches('input[data-action="team-name"]')){
+    state.teamName = el.value.trim();
+    saveSettings(); updateChrome(); render();
+    return;
+  }
+});
+
+document.addEventListener('input', ev=>{
+  const el = ev.target;
+  if(el.id==='playerSearch'){
+    state.playerQuery = el.value;
+    const q = norm(el.value);
+    $$('#playerList .player-item').forEach(item=>{
+      item.style.display = (!q || String(item.dataset.name||'').includes(q)) ? '' : 'none';
+    });
+  }
+});
+
+['dragenter','dragover'].forEach(type=>{
+  document.addEventListener(type, ev=>{
+    const dz = ev.target.closest('#dropzone');
+    if(!dz) return;
+    ev.preventDefault();
+    dz.classList.add('is-over');
+  });
+});
+['dragleave','drop'].forEach(type=>{
+  document.addEventListener(type, ev=>{
+    const dz = ev.target.closest('#dropzone');
+    if(!dz) return;
+    ev.preventDefault();
+    dz.classList.remove('is-over');
+    if(type==='drop'){
+      const file = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+      if(file) loadCSVFile(file);
+    }
+  });
+});
+
+const tipEl = $('#tooltip');
+function positionTip(x,y){
+  if(!tipEl) return;
+  const padPx = 14;
+  const rect = tipEl.getBoundingClientRect();
+  let left = x + padPx;
+  let top = y + padPx;
+  if(left + rect.width > window.innerWidth - 8) left = x - rect.width - padPx;
+  if(top + rect.height > window.innerHeight - 8) top = y - rect.height - padPx;
+  tipEl.style.left = Math.max(6,left)+'px';
+  tipEl.style.top = Math.max(6,top)+'px';
+}
+document.addEventListener('mouseover', ev=>{
+  const target = ev.target.closest('[data-tip]');
+  if(!target || !tipEl) return;
+  const text = target.getAttribute('data-tip');
+  if(!text) return;
+  tipEl.textContent = text;
+  tipEl.classList.add('is-on');
+  positionTip(ev.clientX, ev.clientY);
+});
+document.addEventListener('mousemove', ev=>{
+  if(tipEl && tipEl.classList.contains('is-on')) positionTip(ev.clientX, ev.clientY);
+});
+document.addEventListener('mouseout', ev=>{
+  const target = ev.target.closest('[data-tip]');
+  if(target && tipEl) tipEl.classList.remove('is-on');
+});
+window.addEventListener('scroll', ()=>{ if(tipEl) tipEl.classList.remove('is-on'); }, true);
+
+window.addEventListener('hashchange', ()=>{
+  const v = location.hash.slice(1);
+  if(['equipo','jugadoras','datos'].includes(v)){
+    state.view = v;
+    render();
+  }
+});
+window.addEventListener('resize', debounce(()=>mountCharts(), 160));
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) return;
+  if(state.source==='sheet' && state.sourceUrl && state.lastUpdated){
+    const stale = Date.now() - state.lastUpdated > Math.max(60, Number(state.autoRefreshSec)||300) * 1000;
+    if(stale) loadSheet(state.sourceUrl, true);
+  }
+});
+function showFatal(msg){
+  const el = $('#errbar');
+  if(!el) return;
+  el.hidden = false;
+  el.textContent = 'Error en el panel: ' + msg;
+}
+window.addEventListener('error', e=> showFatal(e.message || 'error desconocido'));
+window.addEventListener('unhandledrejection', e=> showFatal((e.reason && e.reason.message) || String(e.reason)));
+
+/* -------------------------------- Arranque ------------------------------ */
+function init(){
+  try{
+    loadSettings();
+    const params = new URLSearchParams(location.search);
+    const fuenteParam = params.get('fuente');
+    const equipoParam = params.get('equipo');
+    if(equipoParam) state.teamName = equipoParam;
+    if(fuenteParam){
+      try{
+        const decoded = decodeFuente(fuenteParam);
+        if(/^https?:\/\//i.test(decoded)){
+          state.source = 'sheet';
+          state.sourceUrl = decoded;
+          state.sourceLabel = 'Google Sheets';
+        }
+      }catch(err){ console.warn('Enlace de equipo no válido', err); }
+    }
+    const hash = location.hash.replace('#','');
+    const validViews = ['equipo','jugadoras','datos'];
+    if(validViews.includes(hash)) state.view = hash;
+    else if(validViews.includes(params.get('view'))) state.view = params.get('view');
+
+    const wantedSource = state.source;
+    const wantedUrl = state.sourceUrl;
+    const cached = readCache();
+    if((wantedSource==='sheet' || wantedSource==='file') && cached) restoreCache(cached);
+    else loadDemoState();
+
+    render();
+    scheduleAutoRefresh();
+
+    if(wantedSource==='sheet' && wantedUrl){
+      state.source = 'sheet';
+      state.sourceUrl = wantedUrl;
+      state.sourceLabel = 'Google Sheets';
+      updateChrome();
+      loadSheet(wantedUrl, true, !!fuenteParam);
+    }
+
+    const prueba = params.get('probar');
+    if(prueba==='csv'){
+      const ds = parseCSV(SAMPLE_CSV);
+      state.raw = {headers:ds.headers, rows:ds.rows};
+      state.pendingMeta = {kind:'file', label:'CSV de ejemplo'};
+      state.formSource = 'csv';
+      state.mapping = savedMappingFor(ds.headers) || autoMap(ds.headers, ds.rows);
+      if(params.get('destino')==='datos'){
+        state.view = 'datos';
+        render();
+      }else{
+        processDataset(ds.headers, ds.rows, {kind:'file', label:'CSV de ejemplo'}, {});
+      }
+    }
+  }catch(err){
+    console.error(err);
+    showFatal(err.message || String(err));
+  }
+}
+init();
+</script>
+</body>
+</html>
