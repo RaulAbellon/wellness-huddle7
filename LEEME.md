@@ -3,7 +3,7 @@
 Panel independiente para ver de forma gráfica las respuestas del formulario wellness de
 las jugadoras: **fatiga física, molestias, calidad del sueño y regla**.
 
-- **Versión:** 0.3 (26/11/2026) · publicada
+- **Versión:** 0.4 (26/11/2026) · publicada
 - **Tecnología:** un único `index.html` (HTML + CSS + JavaScript, sin librerías externas).
 - **Coste:** 0 €. No hay servidor propio ni base de datos en la nube.
 - **Estilo:** tema oscuro, interfaz en español, sin emojis, alineado con Huddle7.
@@ -48,7 +48,8 @@ tus datos reales: pestaña **Datos** → **Google Sheets** (recomendado) o **Arc
 - Lista con buscador, resumen y mini-gráfica de cada jugadora.
 - Ficha individual: KPIs, **fatiga diaria** con zonas de color, marcas de molestia y días de
   regla, `media del equipo` opcional, **calidad del sueño** en barras, historial de molestias
-  y tarjeta de **ciclo y regla** (últimos inicios, duración, ciclo medio y próxima estimación).
+  y tarjeta de **ciclo menstrual**: calendario mensual con **punto rojo** en los días en que
+  respondió «sí» a la regla, además de último inicio, ciclo medio y próxima estimación.
 
 ### Datos
 
@@ -331,6 +332,9 @@ internas de desarrollo y no forman parte del sitio publicado.
 
 ## 12. Historial de versiones
 
+- **0.4 (26/11/2026)** — la tarjeta **Ciclo menstrual** pasa a ser un calendario mensual con
+  punto rojo en los días de regla (con navegación entre meses y resumen de último inicio,
+  ciclo medio y próxima estimación).
 - **0.3 (26/11/2026)** — corrección de la lectura de datos: detección correcta de la pregunta
   de fatiga (aunque mencione el sueño), molestias con texto libre («piernas y espalda»,
   «rodilla derecha»…), elección de la columna más completa cuando hay columnas repetidas y

@@ -276,6 +276,30 @@ tr.clickable{cursor:pointer}
 .cycle-stat .value small{font-size:9.5px;color:var(--muted);font-weight:600}
 .nota{font-size:10px;color:var(--muted-2);margin:10px 0 0;line-height:1.5}
 
+/* ---------- Calendario del ciclo menstrual ---------- */
+.calendar-wrap{display:grid;grid-template-columns:minmax(250px,360px) minmax(0,1fr);gap:20px;align-items:start}
+.calendar{display:flex;flex-direction:column;gap:5px}
+.cal-head{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-bottom:2px}
+.cal-week{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-day{
+  position:relative;aspect-ratio:1/1;border-radius:8px;border:1px solid rgba(38,52,77,.4);
+  background:rgba(9,15,26,.35);display:flex;justify-content:center;padding-top:5px;
+  font-size:10.5px;font-weight:600;color:var(--muted-2);font-variant-numeric:tabular-nums;
+  transition:background .12s,border-color .12s;
+}
+.cal-day.has-data{color:var(--text);background:rgba(20,33,54,.7)}
+.cal-day.is-empty{background:transparent;border-color:transparent}
+.cal-day.is-today{box-shadow:inset 0 0 0 1px rgba(255,122,26,.6)}
+.cal-day.is-period{background:rgba(255,74,61,.12);border-color:rgba(255,74,61,.3);color:#ffd3ce}
+.cal-day:hover{border-color:rgba(255,122,26,.45)}
+.cal-dot{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 8px rgba(255,74,61,.75)}
+.calendar-side{min-width:0}
+.calendar-side .cycle-stats{grid-template-columns:repeat(3,minmax(0,1fr))}
+.calendar-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:10px;color:var(--muted);margin-top:12px}
+.calendar-legend .k{display:inline-flex;align-items:center;gap:6px}
+.calendar-legend .dot-red{width:8px;height:8px;border-radius:50%;background:#ff4a3d;box-shadow:0 0 6px rgba(255,74,61,.7)}
+.calendar-legend .dot-today{width:9px;height:9px;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,122,26,.7)}
+
 /* ---------- Datos / conexión ---------- */
 .source-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px}
 .source-option{
@@ -379,6 +403,7 @@ pre.code{
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .source-options{grid-template-columns:1fr}
   .cycle-stats{grid-template-columns:1fr}
+  .calendar-wrap{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -424,6 +449,7 @@ const $ = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => Array.from(r.querySelectorAll(s));
 const pad = n => String(n).padStart(2,'0');
 const MONTHS = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const MONTHS_FULL = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const WD = ['D','L','M','X','J','V','S'];
 const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 function parseISO(s){ const p=String(s).split('-').map(Number); return new Date(p[0],(p[1]||1)-1,p[2]||1); }
@@ -805,7 +831,7 @@ function defaultState(){
     compareTeam:true, savedMappings:{}, excluded:[], playerAliases:{},
     entries:[], players:[], raw:null, mapping:null, pendingMeta:null,
     lastUpdated:null, loading:false, importInfo:null,
-    day:todayISO(), selectedPlayer:null, playerQuery:'',
+    day:todayISO(), selectedPlayer:null, playerQuery:'', calendarMonth:null,
     formSource:null, connectionMsg:''
   };
 }
@@ -995,8 +1021,14 @@ function periodEpisodes(p){
   const eps = [];
   for(const d of dates){
     const last = eps[eps.length-1];
-    if(last && daysBetween(last.end,d)===1){ last.end=d; last.days++; }
-    else eps.push({start:d, end:d, days:1});
+    // Se agrupan los «sí» separados por 1-2 días: suele ser un día sin respuesta en medio
+    // de la misma regla. Dos reglas distintas están a ~28 días, así que no se mezclan.
+    if(last && daysBetween(last.end, d) <= 2){
+      last.end = d;
+      last.days = daysBetween(last.start, d) + 1;
+    }else{
+      eps.push({start:d, end:d, days:1});
+    }
   }
   return eps;
 }
@@ -1004,8 +1036,11 @@ function cycleInfo(p){
   const eps = periodEpisodes(p);
   const starts = eps.map(e=>e.start);
   const lens = [];
-  for(let i=1;i<starts.length;i++) lens.push(daysBetween(starts[i-1],starts[i]));
-  const avg = mean(lens);
+  for(let i=1;i<starts.length;i++){
+    const gap = daysBetween(starts[i-1], starts[i]);
+    if(gap >= 15 && gap <= 60) lens.push(gap); // solo intervalos de ciclo creíbles
+  }
+  const avg = lens.length ? mean(lens) : null;
   const dur = mean(eps.map(e=>e.days));
   const last = eps[eps.length-1];
   const next = last ? addDays(last.start, Math.round(avg || 28)) : null;
@@ -1649,19 +1684,80 @@ function playerDetailHTML(p, st){
       </div>
     </div>
     <div class="card">
-      <div class="card-head"><div><h3>Ciclo y regla</h3><div class="hint">Estimación orientativa a partir de los «sí» del formulario</div></div></div>
-      ${cycle.eps.length ? `
-        <div class="cycle-stats">
-          <div class="cycle-stat"><div class="label">Último inicio</div><div class="value">${fmtDay(cycle.last.start,{wd:false})}</div></div>
-          <div class="cycle-stat"><div class="label">Ciclo medio</div><div class="value">${cycle.avg!=null?num1(cycle.avg)+' <small>días</small>':'<small>sin historial</small>'}</div></div>
-          <div class="cycle-stat"><div class="label">Próximo inicio aprox.</div><div class="value">${cycle.next?fmtDay(cycle.next,{wd:false}):'—'}</div></div>
+      ${calendarCardHTML(p, cycle)}
+    </div>`;
+}
+
+function monthLabel(monthKeyStr){
+  const parts = String(monthKeyStr).split('-').map(Number);
+  const name = MONTHS_FULL[parts[1]-1] || '';
+  return `${name.charAt(0).toUpperCase()+name.slice(1)} ${parts[0]}`;
+}
+function calendarWeeks(monthKeyStr){
+  const parts = String(monthKeyStr).split('-').map(Number);
+  const year = parts[0], month = parts[1];
+  const offset = (new Date(year, month-1, 1).getDay() + 6) % 7; // lunes primero
+  const total = new Date(year, month, 0).getDate();
+  const cells = [];
+  for(let i=0;i<offset;i++) cells.push(null);
+  for(let d=1; d<=total; d++) cells.push(`${year}-${pad(month)}-${pad(d)}`);
+  while(cells.length % 7) cells.push(null);
+  const weeks = [];
+  for(let i=0;i<cells.length;i+=7) weeks.push(cells.slice(i,i+7));
+  return weeks;
+}
+function calendarCardHTML(p, cycle){
+  const today = todayISO();
+  const lastEntryDate = p.entries.length ? p.entries[p.entries.length-1].date : today;
+  if(!state.calendarMonth || !/^\d{4}-\d{2}$/.test(state.calendarMonth)){
+    state.calendarMonth = (lastEntryDate || today).slice(0,7);
+  }
+  if(state.calendarMonth > today.slice(0,7)) state.calendarMonth = today.slice(0,7);
+  const mk = state.calendarMonth;
+  const byDate = new Map(p.entries.map(e=>[e.date, e]));
+  const weeks = calendarWeeks(mk);
+  const head = ['L','M','X','J','V','S','D'].map(w=>`<span>${w}</span>`).join('');
+  const weekHTML = weeks.map(week=>`<div class="cal-week">${week.map(date=>{
+    if(!date) return '<div class="cal-day is-empty"></div>';
+    const e = byDate.get(date);
+    const period = !!(e && e.period===1);
+    let tip = fmtDay(date,{wd:true});
+    if(e){
+      tip += `\nRegla: ${period ? 'sí' : e.period===0 ? 'no' : 'sin dato'}`;
+      if(e.fatigue!=null) tip += `\nFatiga: ${e.fatigue}/10`;
+      if(e.sleep!=null) tip += `\nCalidad del sueño: ${e.sleep}/5`;
+      if(e.discomfort===1) tip += `\nMolestia: ${e.discomfortNote||'sí'}`;
+    }else{
+      tip += '\nSin respuesta';
+    }
+    return `<div class="cal-day${e?' has-data':''}${period?' is-period':''}${date===today?' is-today':''}" data-tip="${esc(tip).replace(/\n/g,'&#10;')}"><span class="n">${parseInt(date.slice(8,10),10)}</span>${period?'<i class="cal-dot"></i>':''}</div>`;
+  }).join('')}</div>`).join('');
+  const periodInMonth = p.entries.filter(e=>e.date.startsWith(mk) && e.period===1).length;
+  const currentMonth = today.slice(0,7);
+  return `<div class="card">
+      <div class="card-head">
+        <div><h3>Ciclo menstrual</h3><div class="hint">Punto rojo: días en los que respondió «sí» a la regla</div></div>
+        <div class="side">
+          <button type="button" class="btn btn-sm" data-action="cal-prev" title="Mes anterior">‹</button>
+          <span class="chip" style="border-color:rgba(255,122,26,.35);color:var(--text)">${monthLabel(mk)}</span>
+          <button type="button" class="btn btn-sm" data-action="cal-next" ${mk>=currentMonth?'disabled':''} title="Mes siguiente">›</button>
         </div>
-        <div class="table-wrap"><table>
-          <thead><tr><th>Inicio</th><th>Duración</th></tr></thead>
-          <tbody>${cycle.eps.slice(-4).reverse().map(ep=>`<tr><td>${fmtDay(ep.start,{wd:false,yr:true})}</td><td>${ep.days} día${ep.days===1?'':'s'}</td></tr>`).join('')}</tbody>
-        </table></div>
-        <p class="nota">${perDays} día${perDays===1?'':'s'} de regla en el periodo seleccionado.${cycle.avg==null?' Con un solo ciclo registrado, el próximo inicio se estima usando 28 días como referencia.':''} La predicción es aproximada y no sustituye a lo que indique la jugadora.</p>`
-      : '<div class="muted" style="font-size:11px;padding:8px 0">Todavía no hay registros de regla para esta jugadora.</div>'}
+      </div>
+      <div class="calendar-wrap">
+        <div class="calendar"><div class="cal-head">${head}</div>${weekHTML}</div>
+        <div class="calendar-side">
+          <div class="cycle-stats">
+            <div class="cycle-stat"><div class="label">Último inicio</div><div class="value">${cycle.eps.length?fmtDay(cycle.last.start,{wd:false}):'—'}</div></div>
+            <div class="cycle-stat"><div class="label">Ciclo medio</div><div class="value">${cycle.avg!=null?num1(cycle.avg)+' <small>días</small>':'<small>sin historial</small>'}</div></div>
+            <div class="cycle-stat"><div class="label">Próximo inicio aprox.</div><div class="value">${cycle.next?fmtDay(cycle.next,{wd:false}):'—'}</div></div>
+          </div>
+          <div class="calendar-legend">
+            <span class="k"><i class="dot-red"></i>Día con la regla</span>
+            <span class="k"><i class="dot-today"></i>Hoy</span>
+          </div>
+          <p class="nota">${periodInMonth} día${periodInMonth===1?'':'s'} marcado${periodInMonth===1?'':'s'} en ${monthLabel(mk)}.${cycle.avg==null?' Con un solo ciclo registrado, el próximo inicio se estima usando 28 días como referencia.':''} La predicción es aproximada y no sustituye a lo que indique la jugadora.</p>
+        </div>
+      </div>
     </div>`;
 }
 
@@ -2282,6 +2378,22 @@ document.addEventListener('click', ev=>{
       break;
     }
     case 'day-today': state.day = todayISO(); render(); break;
+    case 'cal-prev': {
+      const mk = state.calendarMonth || todayISO().slice(0,7);
+      const parts = mk.split('-').map(Number);
+      const d = new Date(parts[0], parts[1]-2, 1);
+      state.calendarMonth = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+      render();
+      break;
+    }
+    case 'cal-next': {
+      const mk = state.calendarMonth || todayISO().slice(0,7);
+      const parts = mk.split('-').map(Number);
+      const d = new Date(parts[0], parts[1], 1);
+      state.calendarMonth = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+      render();
+      break;
+    }
     case 'load-demo': loadDemo(); break;
     case 'goto-datos': goView('datos'); break;
     case 'source-option': state.formSource = el.dataset.source; render(); break;
