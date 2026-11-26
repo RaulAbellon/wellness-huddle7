@@ -3,7 +3,7 @@
 Panel independiente para ver de forma gráfica las respuestas del formulario wellness de
 las jugadoras: **fatiga física, molestias, calidad del sueño y regla**.
 
-- **Versión:** 0.2 (26/11/2026) · publicada
+- **Versión:** 0.2.1 (26/11/2026) · publicada
 - **Tecnología:** un único `index.html` (HTML + CSS + JavaScript, sin librerías externas).
 - **Coste:** 0 €. No hay servidor propio ni base de datos en la nube.
 - **Estilo:** tema oscuro, interfaz en español, sin emojis, alineado con Huddle7.
@@ -20,9 +20,9 @@ Hay dos formas de abrirlo, con el mismo contenido:
    dispositivo, sin instalar nada.
 2. **Archivo local:** doble clic en `index.html` (útil como copia de seguridad sin conexión).
 
-La primera vez se cargan **datos de ejemplo** (13 jugadoras durante 5 semanas) para que
-puedas probar todas las vistas sin configurar nada. Cuando quieras usar tus datos reales:
-pestaña **Datos** → **Google Sheets** (recomendado) o **Archivo CSV**.
+La primera vez se cargan **datos de ejemplo** (equipo Cadete Femenino, 13 jugadoras durante
+5 semanas) para que puedas probar todas las vistas sin configurar nada. Cuando quieras usar
+tus datos reales: pestaña **Datos** → **Google Sheets** (recomendado) o **Archivo CSV**.
 
 > El panel no modifica la hoja de respuestas: solo lee.
 
@@ -319,6 +319,8 @@ internas de desarrollo y no forman parte del sitio publicado.
 
 ## 12. Historial de versiones
 
+- **0.2.1 (26/11/2026)** — nombre del equipo por defecto: **Cadete Femenino** (se puede cambiar
+  en Datos); el enlace de equipo incluye siempre el nombre del equipo.
 - **0.2 (26/11/2026)** — publicación en GitHub Pages
   (<https://raulabellon.github.io/wellness-huddle7/>), enlace para compartir el panel conectado
   con el equipo técnico, carga automática de la fuente con `?fuente=`, guía ampliada y QA de

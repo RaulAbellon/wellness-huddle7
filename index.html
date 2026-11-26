@@ -513,7 +513,8 @@ function buildShareLink(){
   const base = location.href.split('#')[0].split('?')[0];
   const params = new URLSearchParams();
   if(state.sourceUrl) params.set('fuente', encodeFuente(state.sourceUrl));
-  if(state.teamName) params.set('equipo', state.teamName);
+  const team = state.teamName || teamLabel();
+  if(team) params.set('equipo', team);
   const qs = params.toString();
   return base + (qs ? '?' + qs : '') + '#equipo';
 }
@@ -871,7 +872,7 @@ function pickDefaultDay(){
 }
 function teamLabel(){
   if(state.teamName) return state.teamName;
-  return state.source==='demo' ? 'Juvenil Femenino' : 'Mi equipo';
+  return 'Cadete Femenino';
 }
 
 /* -------------------------- Estadística básica -------------------------- */
